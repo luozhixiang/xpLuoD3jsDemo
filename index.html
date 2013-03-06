@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    
+	<title>XpD3jsChart</title>
+	
+	<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-responsive.min.css" />
+	<link rel="stylesheet" type="text/css" href="css/all.css" />
+	<!-- INCLUDE THIS -->
+	
+	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/handlebars.min.js"></script>
+	<script type="text/javascript" src="js/templates.js" ></script>
+	<script type="text/javascript" src="js/hrender.js"></script>
+	<script type="text/javascript" src="js/brite.min.js"></script>
+	<script type="text/javascript" src="js/jquery.tipsy.js"></script>
+	<script type="text/javascript" src="js/d3.v3.js"></script>
+		
+	<!-- Component JS Files -->
+	<script type="text/javascript" src="js/D3ForceClusterChart.js"></script>
+	<!-- /Component JS Files -->
+	
+
+	<script type='text/javascript'>
+		$(function(){
+			var $this = $(this);
+			$this.find(".side-nav-item").click(function(){
+				var $this = $(this);
+				var val = $this.attr("data-section");
+				if(typeof val != "undefined"){
+					$this.parent().children().removeClass("sel");
+					$this.addClass("sel");
+					if (val == "D3ForceClusterChart"){
+						brite.display("D3ForceClusterChart",$("#reports-container"));
+					}
+				}
+			});
+		});
+		$(function(){
+			brite.display("MainScreen","#bodyPage");
+		});
+	</script>
+
+</head>
+
+<body>
+	<div id="bodyPage"></div>
+</body>
+</html>
