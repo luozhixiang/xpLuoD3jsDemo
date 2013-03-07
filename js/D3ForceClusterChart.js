@@ -25,24 +25,24 @@ var smr = smr || {};
 		
 		$("#D3ForceClusterChart").empty();
 		
-		var width = 960,
-		    height = 600;
-		    var color = d3.scale.category20();
+		var width = 960;
+		var height = 600;
+		var color = d3.scale.category20();
 
 		var svg = d3.select("#D3ForceClusterChart").append("svg")
 		    .attr("width", width)
 		    .attr("height", height);
 
 		var force = d3.layout.force()
-		    .gravity(.05)
-		    .charge(-100)
-		    .size([width, 400]);
+				      .gravity(.05)
+				      .charge(-100)
+				      .size([width, 400]);
 
 
-		  force.nodes(json.nodes)
-		       .links(json.links)
-		       .distance(100)
-		       .start();
+		    force.nodes(json.nodes)
+		         .links(json.links)
+		         .distance(function(d){ return d.weight+10;})
+		         .start();
 
 		  var link = svg.selectAll(".link")
 		      .data(json.links)
@@ -100,8 +100,8 @@ var smr = smr || {};
 		for(var i=1; i<30;i++){
 			var user = {id:i,name:"user"+i,friends:[]};
 			for(var j = 0; j < i; j++) {
-				if(Math.random() > 0.90)
-					user.friends.push({id : j , weight : parseInt(Math.random()*(20-5+1) + 5)});
+				if(Math.random() > 0.92)
+					user.friends.push({id : j , weight : parseInt(Math.random()*(80-5+1) + 5)});
 			}
 			data.push(user)
 		}
