@@ -52,15 +52,15 @@ var smr = smr || {};
 		  var node = svg.selectAll(".node")
 		      .data(json.nodes)
 		    .enter().append("g")
-		      .attr("class", "node");
-//		      .call(force.drag);
+		      .attr("class", "node")
+		      .call(force.drag);
 
 		  node.append("circle")
 		      .attr("class", "circle")
 		      .attr("x", -8)
 		      .attr("y", -8)
 		      .attr("r", 4.5)
-		      .style("fill", function(d) { return color(d.group); });
+		      .style("fill", function(d) { return color(2); });
 
 		  node.append("text")
 		      .attr("dx", 12)
@@ -68,16 +68,18 @@ var smr = smr || {};
 		      .text(function(d) { return d.name });
 
 		  force.on("tick", function() {
+			  
 		    link.attr("x1", function(d) { return d.source.x; })
 		        .attr("y1", function(d) { return d.source.y; })
 		        .attr("x2", function(d) { return d.target.x; })
 		        .attr("y2", function(d) { return d.target.y; });
-
 		    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
 		  });
 		  
 		  $e.delegate("circle","click",function(){
+			  view.json.nodes.sort(sortByNodesName);
+			  view.json.links.sort(sortByLinksWeight);
 			  view.showView(view.json);
 		  });
 	}
@@ -125,6 +127,14 @@ var smr = smr || {};
 			});
 		})
 		return object;
+	}
+	
+	function sortByNodesName(a,b){
+		return a.name<b.name ? 1 :-1;
+	}
+	
+	function sortByLinksWeight(a,b){
+		return a.weight<b.weight ? 1 :-1;
 	}
 	
 	// -----------------/Private Method ----------------------- //
