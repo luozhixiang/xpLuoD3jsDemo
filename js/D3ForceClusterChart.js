@@ -1,7 +1,7 @@
 var smr = smr || {};
 
 (function($){
-
+	
 	// --------- Component Interface Implementation ---------- //
 	function D3ForceClusterChart(){};
 	smr.D3ForceClusterChart = D3ForceClusterChart; 
@@ -19,69 +19,61 @@ var smr = smr || {};
 	D3ForceClusterChart.prototype.showView= function(json){
 		var view = this;
 		var $e = view.$el;
-		
-		json = json || getNodeDataByUserData.call(this,generateData());
-		view.json = json;
-		
-		$("#D3ForceClusterChart").empty();
-		
-		var width = 960;
-		var height = 600;
+			
+		var width = 960,
+		    height = 500;
+	
 		var color = d3.scale.category20();
-
+	
+		var force = d3.layout.difinedf()
+		      .charge(-240)
+		      .linkDistance(40)
+		      .size([width, height]);
+	
 		var svg = d3.select("#D3ForceClusterChart").append("svg")
-		    .attr("width", width)
-		    .attr("height", height);
+		      .attr("width", width)
+		      .attr("height", height);
+	
+		var data = getNodeDataByUserData.call(this,generateData());;
 
-		var force = d3.layout.force()
-				      .gravity(.05)
-				      .charge(-100)
-				      .size([width, 400]);
+	    var n = data.nodes.length;
 
+	    force.nodes(data.nodes).links(data.links);
 
-		    force.nodes(json.nodes)
-		         .links(json.links)
-		         .distance(function(d){ return d.weight+10;})
-		         .start();
+	    // Initialize the positions deterministically, for better results.
+	    data.nodes.forEach(function(d, i) { d.x = d.y = width / n * i; });
 
-		  var link = svg.selectAll(".link")
-		      .data(json.links)
-		    .enter().append("line")
-		      .attr("class", "link");
+	    // Run the layout a fixed number of times.
+	    force.start();
+	    for (var i = n; i > 0; --i) force.tick();
+	    force.stop();
 
-		  var node = svg.selectAll(".node")
-		      .data(json.nodes)
-		    .enter().append("g")
-		      .attr("class", "node")
-		      .call(force.drag);
+	    // Center the nodes in the middle.
+	    var ox = 0, oy = 0;
+	    data.nodes.forEach(function(d) { ox += d.x, oy += d.y; });
+	    ox = ox / n - width / 2, oy = oy / n - height / 2;
+	    data.nodes.forEach(function(d) { d.x -= ox, d.y -= oy; });
 
-		  node.append("circle")
-		      .attr("class", "circle")
-		      .attr("x", -8)
-		      .attr("y", -8)
-		      .attr("r", 4.5)
-		      .style("fill", function(d) { return color(2); });
+	    var link = svg.selectAll(".link")
+	        .data(data.links)
+	      .enter().append("line")
+	        .attr("class", "link")
+	        .attr("x1", function(d) { return d.source.x; })
+	        .attr("y1", function(d) { return d.source.y; })
+	        .attr("x2", function(d) { return d.target.x; })
+	        .attr("y2", function(d) { return d.target.y; })
+	        .style("stroke-width", function(d) { return 1; });
 
-		  node.append("text")
-		      .attr("dx", 12)
-		      .attr("dy", ".35em")
-		      .text(function(d) { return d.name });
+	    var node = svg.selectAll(".node")
+	        .data(data.nodes)
+	      .enter().append("circle")
+	        .attr("class", "node")
+	        .attr("cx", function(d) { return d.x; })
+	        .attr("cy", function(d) { return d.y; })
+	        .attr("r", 4.5)
+	        .style("fill", function(d) { return color(1); })
+	        .call(force.drag);
 
-		  force.on("tick", function() {
-			  
-		    link.attr("x1", function(d) { return d.source.x; })
-		        .attr("y1", function(d) { return d.source.y; })
-		        .attr("x2", function(d) { return d.target.x; })
-		        .attr("y2", function(d) { return d.target.y; });
-		    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-		  });
-		  
-		  $e.delegate("circle","click",function(){
-			  view.json.nodes.sort(sortByNodesName);
-			  view.json.links.sort(sortByLinksWeight);
-			  view.showView(view.json);
-		  });
 	}
 	
 	// --------- /Component Interface Implementation ---------- //
@@ -102,7 +94,7 @@ var smr = smr || {};
 		for(var i=1; i<30;i++){
 			var user = {id:i,name:"user"+i,friends:[]};
 			for(var j = 0; j < i; j++) {
-				if(Math.random() > 0.92)
+				if(Math.random() > 0.85)
 					user.friends.push({id : j , weight : parseInt(Math.random()*(80-5+1) + 5)});
 			}
 			data.push(user)
@@ -129,10 +121,16 @@ var smr = smr || {};
 		return object;
 	}
 	
+	/**
+	 * sort node by name 
+	 */
 	function sortByNodesName(a,b){
 		return a.name<b.name ? 1 :-1;
 	}
 	
+	/**
+	 * sort Json by links's weight
+	 */
 	function sortByLinksWeight(a,b){
 		return a.weight<b.weight ? 1 :-1;
 	}
