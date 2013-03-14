@@ -31,18 +31,18 @@ var smr = smr || {};
 		$("#D3ForceClusterChart").empty();
 		
 		var width = 960,
-		    height = 500
+		    height = 500;
 	
 		var svg = d3.select("#D3ForceClusterChart").append("svg")
 		    .attr("width", width)
 		    .attr("height", height);
 	
-		var force = d3.layout.force().size([960, 500])
+		var force = d3.layout.force().size([width, height])
 					 .nodes(json.nodes)
 					 .links(json.links)
 					 .gravity(1)
 					 .linkDistance(function(d){return d.value+50})
-					 .charge(-3000);
+					 .charge(-3100);
 	
 		  force.nodes(json.nodes)
 		       .links(json.links)
