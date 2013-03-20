@@ -135,7 +135,9 @@ var smr = smr || {};
 	              vis.selectAll("g.node")
 		              .transition()
 		              .ease("linear")
-		              .duration(1000).remove();
+		              .duration(1000)
+		              .style("opacity",0)
+				      .remove();
 	              
 	              vis.selectAll("ellipse.nodes")
 	                 .transition()
@@ -192,6 +194,7 @@ var smr = smr || {};
 				      .data(_nodes)
 				    .enter().append("g")
 				      .attr("class", "node")
+				      .style("opacity",0)
 				      .attr("transform", function(d) { return "rotate(" + (d.x - 90) + ")translate(" + getNodeTranslate(d) + ")"; })
 				    .append("svg:text")
 				      .attr("dx", function(d) { return d.x < 180 ? 12 : -18; })
@@ -199,6 +202,12 @@ var smr = smr || {};
 				      .attr("text-anchor", function(d) { return d.x < 180 ? "start" : "end"; })
 				      .attr("transform", function(d) { return d.x < 180 ? null : "rotate(180)"; })
 				      .text(function(d) { return d.name; });
+				  
+		          vis.selectAll("g.node")
+		              .transition()
+		              .ease("linear")
+		              .duration(1000)
+		              .style("opacity",1);
 	        }
 	        
 	        
