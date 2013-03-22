@@ -186,4 +186,27 @@ body {
   pointer-events: none;
   font: 10px sans-serif;
 }
+.ContactCluster {
+  margin: 10px;
+}
+.ContactCluster path.arc {
+  fill: #fff;
+}
+.ContactCluster .node {
+  font-size: 12px;
+  pointer-events: none;
+}
+.ContactCluster circle.nodes {
+  stroke: #FB4100;
+  stroke-width: 1.5px;
+  cursor: pointer;
+}
+.ContactCluster circle.origin {
+  stroke: #CCC;
+  stroke-width: 1px;
+}
+.ContactCluster .link {
+  stroke: #CCC;
+  stroke-width: 1.5px;
+}
 
