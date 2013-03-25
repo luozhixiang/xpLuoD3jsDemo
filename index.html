@@ -4,7 +4,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7"/>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     
-	<title>XpD3jsChart</title>
+	<title>ContactClusterDemo</title>
 	
 	<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-responsive.min.css" />
@@ -18,27 +18,25 @@
 	<script type="text/javascript" src="js/brite.min.js"></script>
 	<script type="text/javascript" src="js/jquery.tipsy.js"></script>
 	<script type="text/javascript" src="js/d3.v3.js"></script>
+	<script type="text/javascript" src="js/easeljs-0.6.0.min.js"></script>
 	<script type="text/javascript" src="js/difinedf.js"></script>
 		
 	<!-- Component JS Files -->
 	<script type="text/javascript" src="js/D3ForceClusterChart.js"></script>
 	<script type="text/javascript" src="js/D3ForceChart.js"></script>
 	<script type="text/javascript" src="js/ContactCluster.js"></script>
+	<script type="text/javascript" src="js/EaseljsClusterChart.js"></script>
 	<!-- /Component JS Files -->
 	
 
 	<script type='text/javascript'>
 		$(function(){
-			var $this = $(this);
-			$this.find(".side-nav-item").click(function(){
+			$("#bodyPage").delegate(".menu","click",function(){
 				var $this = $(this);
-				var val = $this.attr("data-section");
+				var val = $this.attr("data-nav");
 				if(typeof val != "undefined"){
-					$this.parent().children().removeClass("sel");
-					$this.addClass("sel");
-					if (val == "D3ForceClusterChart"){
-						brite.display("D3ForceClusterChart",$("#reports-container"));
-					}
+					$this.addClass("active").siblings().removeClass("active");
+					brite.display(val,$(".MainScreen-main"));
 				}
 			});
 		});

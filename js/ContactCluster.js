@@ -10,7 +10,6 @@
         postDisplay:function (data, config) {
             var view = this;
             var $e = view.$el;
-            
             var dataSet = createDataSet(30);
 			var chartData = transformData(dataSet);
 			view.dataSet = dataSet;
