@@ -23,7 +23,7 @@ var smr = smr || {};
 	
 	EaseljsClusterChart.prototype.showView = function(data){
 		var view = this;
-		var $e = view.$el;
+		var $e = view.$element;
 		
 		var canvas = $e.find("canvas").get(0);
 		var stage = new createjs.Stage(canvas);
