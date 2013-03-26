@@ -14,111 +14,170 @@ var smr = smr || {};
 	EaseljsClusterChart.prototype.postDisplay = function(data, config) {
 		var view = this;
 		var $e = view.$el;
-		var dataSet = createDataSet(30);
+		var dataSet = app.createDataSet(3000);
 		view.dataSet = dataSet;
-		data = transformData(dataSet);
+		data = app.transformData(dataSet);
 		view.showView(data);
 		createjs.Ticker.useRAF = true;
+		createjs.Ticker.setFPS(55);
 	}
 	
 	EaseljsClusterChart.prototype.showView = function(data){
 		var view = this;
 		var $e = view.$element;
-		
 		var canvas = $e.find("canvas").get(0);
 		var stage = new createjs.Stage(canvas);
-			
-		//draw the background shape
-		var containershap = new createjs.Container();
-		containershap.x=-100;
-		containershap.y=-100;
-		var bg = new createjs.Shape();
-		containershap.addChild(bg);
 		
-		//draw the center node
-		var centerPoint = new createjs.Graphics().beginFill("#006400").drawCircle(400, 400, 10).closePath();
-		var shape = new createjs.Shape(centerPoint);
-		containershap.alpha=0;
-		containershap.addChild(shape);
-		
-		//draw the center node text
-		var centerText = new createjs.Text(data.name, "10px Arial", "#777");
-		centerText.x = 410;
-		centerText.y = 410;
-		containershap.addChild(centerText);
-		
-		$.each(data.children,function(i,item){
-			
-			//calculate the angle of the node and the line length
-			var angle = (360/data.children.length)*(Math.PI/180)*i;
-			var lineLength = (item.weight/10) * 150;
-			
-			//calculate the node position of circle center 
-			var point = {x:400+ (Math.cos(angle)*lineLength),y:400 + (Math.sin(angle)*lineLength)};			
-			
-			//draw the node
-			var node = new createjs.Shape();
-			node.graphics.beginFill("rgba(255,102,0,1)").drawCircle(point.x, point.y, 10).closePath();
-			node.point=point;
-			node.pname = item.name;
-			containershap.addChild(node);
-			
-			//add click event for the node
-			node.addEventListener("click",function(evt){
-				var mpx = (evt.target.point.x - 400)/10;
-				var mpy = (evt.target.point.y - 400)/10;
-				
-				evt.target.graphics.clear()
-				evt.target.graphics.beginFill("#006400").drawCircle(evt.target.point.x, evt.target.point.y, 10).closePath();
-				centerPoint.clear();
-				centerPoint.beginFill("rgba(255,102,0,1)").drawCircle(400, 400, 10).closePath();
-				createjs.Ticker.setFPS(30);
-				createjs.Ticker.addEventListener("tick", tick);
-	    		
-	    		function tick(){
-	    			containershap.alpha = containershap.alpha-0.1;
-	    			containershap.x = containershap.x-mpx;
-	    			containershap.y = containershap.y-mpy;
-	    			stage.update();
-	    			if(containershap.alpha<=0){
-	    				createjs.Ticker.removeEventListener("tick", tick);
-	    				stage.clear();
-	    				var userData = transformData(view.dataSet,evt.target.pname);
-	    				view.showView(userData);
-	    			}
-	    		}
-			});
-			
-			//draw the line 
-			bg.graphics.beginStroke(i%2 ? "#333" : "#444") .moveTo(400,400).lineTo(point.x,point.y);
-			
-			//draw the node text
-			var text = new createjs.Text(item.name, "10px Arial", "#777");
-			var deviation = getDeviationForNodeText(data.children.length,i);
-			text.x = point.x + deviation.mx;
-			text.y = point.y + deviation.my;
-			containershap.addChild(text);
-			
-		});
-		
-		stage.addChild(containershap);	
-		stage.update();
-		createjs.Ticker.setFPS(20);
-		createjs.Ticker.addEventListener("tick", showTick);
-		
-		function showTick(){
-			containershap.alpha = containershap.alpha+0.2;
-			stage.update();
-			if(containershap.alpha>=1){
-				createjs.Ticker.removeEventListener("tick", showTick);
-			}
-		}
-		
+        view.stage = stage;
+        view.currentContainerName = "currentContainer";
+        view.newContainerName = "newContainer";
+        view.cName = "centerCircle";
+	      
+        var container = createContainer.call(view,data);
+        container.name = view.currentContainerName;
+        stage.addChild(container);
+        stage.update();		
 	}
 	
 	// --------- /Component Interface Implementation ---------- //
 	
 	// --------- Private Method --------- //
+	
+	function createContainer(data){
+	      var view = this;
+	      var stage = view.stage;
+	      var baseLineLength = 20;
+	      var centerX = 400;
+	      var centerY = 400;
+	      var angle = (360/data.children.length)*(Math.PI/180);
+	      var container = new createjs.Container();
+	      data.children.sort(weightSort);
+	      $.each(data.children,function(i,cData){
+		        var weight = cData.weight > 4 ? cData.weight : cData.weight;
+		        var l = weight * baseLineLength;
+		        var cx = centerX + l * Math.sin(angle * i);
+		        var cy = centerY + l * Math.cos(angle * i);	
+		        
+		        //draw the node and the line
+		        var line = createLine.call(view,centerX,centerY,cx,cy);
+		        var node = createNodeCircle.call(view,cx,cy,cData.name);
+		        container.addChild(line);
+		        container.addChild(node);
+		        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
+		        
+		        //draw the node text
+				var text = new createjs.Text(cData.name, "10px Arial", "#777");
+				var deviation = getDeviationForNodeText(data.children.length,i);
+				text.x = cx + deviation.mx;
+				text.y = cy + deviation.my;
+				container.addChild(text);
+	      });
+	      
+	      //draw the center node
+	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName);
+	      container.addChild(centerCircle);
+	      
+		  //draw the center node text
+		  var centerText = new createjs.Text(data.name, "10px Arial", "#777");
+		  centerText.x = centerX+10;
+		  centerText.y = centerX+10;
+		  container.addChild(centerText);
+		  
+	      return container;
+	}
+	
+	
+    function createNodeCircle(cx,cy,cName){
+        var r = 7;
+        var circle = new createjs.Shape();
+        circle.graphics.beginRadialGradientFill(["#FCA000","#F8F28A"],[0,1], 0, 0, r, 0, 0, 0).drawCircle(0, 0, r);
+        circle.graphics.beginStroke("#FB4100").drawCircle(0, 0, r+1);
+        circle.x = cx;
+        circle.y = cy;
+        circle.name = cName;
+        return circle;
+    }
+      
+    function createCenterCircle(centerX,centerY,cName){
+	    var r = 10;
+	    var circle = new createjs.Shape();
+	    circle.graphics.beginStroke("#cccccc").drawCircle(0, 0, r+1);
+	    circle.graphics.beginLinearGradientFill(["#006400","#6DA202"],[0,1], 0, 0, r, 0, 0, 0).drawCircle(0, 0, r);
+	    circle.name = cName;
+	    circle.x = centerX;
+	    circle.y = centerY;
+	    return circle;
+   }
+      
+   function createLine(x0, y0, x1, y1){
+        var line = new createjs.Shape();
+        line.graphics.beginStroke("#cccccc").moveTo(x0,y0).lineTo(x1,y1);
+        return line;
+   }
+	
+   function nodeClickEvent(circleNode) {
+	      var view = this;
+	      var stage = view.stage;
+	      var oldContainer = stage.getChildByName(view.currentContainerName);
+	      var newCircle = createCenterCircle.call(view,circleNode.x,circleNode.y);
+	      oldContainer.removeChild(circleNode);
+	      oldContainer.addChild(newCircle);
+
+	      var oldCenterCircle = oldContainer.getChildByName(view.cName);
+	      var newCenterCircle = createNodeCircle.call(view,oldCenterCircle.x,oldCenterCircle.y,view.cName);
+	      oldContainer.removeChild(oldCenterCircle);
+	      oldContainer.addChild(newCenterCircle);
+	      
+	      var centerX = newCenterCircle.x;
+	      var centerY = newCenterCircle.y;
+
+	      //create new Container
+	      var newData = app.transformData(view.dataSet, circleNode.name);
+	      var newContainer = createContainer.call(view, newData);
+	      newContainer.name = view.newContainerName;
+	      newContainer.x = circleNode.x - centerX;
+	      newContainer.y = circleNode.y - centerY;
+	      newContainer.alpha = 0;
+	      stage.addChild(newContainer);
+	      stage.update();
+	      
+	      
+	      var x0 = centerX;
+	      var y0 = centerY;
+	      var x1 = newCircle.x;
+	      var y1 = newCircle.y;
+	      
+	      function tick(event) {
+		        var oldContainer = stage.getChildByName(view.currentContainerName);
+		        var newContainer = stage.getChildByName(view.newContainerName);
+		        oldContainer.alpha = oldContainer.alpha - 0.05;
+		        newContainer.alpha = newContainer.alpha + 0.05;
+		        oldContainer.x =  oldContainer.x - ((x1 - x0) /20);
+		        oldContainer.y =  oldContainer.y - ((y1 - y0) /20);
+		        newContainer.x =  newContainer.x - ((x1 - x0) /20);
+		        newContainer.y =  newContainer.y - ((y1 - y0) /20);
+		        stage.update(event);
+		        
+		        if(oldContainer.alpha <= 0){
+		          animationEnd.call(view);
+		          stage.update(event);
+		        }
+	      }
+	      
+	      function animationEnd(){
+		        createjs.Ticker.removeEventListener("tick",tick);
+		        var oldContainer = stage.getChildByName(view.currentContainerName);
+		        var newContainer = stage.getChildByName(view.newContainerName);
+		        newContainer.x = 0;
+		        newContainer.y = 0;
+		        stage.removeChild(oldContainer);
+		        newContainer.name = view.currentContainerName;
+		        newContainer.alpha = 1;
+	      }
+
+	      createjs.Ticker.addEventListener("tick", tick);
+	}
+   
 	function getDeviationForNodeText(length,index){
 		var mx = 0;
 		var my = 0;
@@ -147,63 +206,6 @@ var smr = smr || {};
 		}
 		return {mx:mx,my:my};
 	}
-	
-	function createDataSet(dataSize){
-		var dataSet = [];
-		dataSize = dataSize || 10;
-		for(var i = 1; i <= dataSize;i++){
-			var data = {};
-			data.id = i;
-			data.name = "User" + i;
-			var friendsNum = RandomData(5,10);
-			var friendsArr = [];
-			for(var j = 1; j < friendsNum;j++){
-				var friend = {};
-				if(j == i) continue;
-				friend.id = j;
-				friend.name = "User" + j;
-				friend.weight = RandomData(5,10);
-				friendsArr.push(friend);
-			}
-			data.friends = friendsArr;
-			dataSet.push(data);
-		}
-		return dataSet;
-	}
-	
-	//generate the data between fromNum and toNum
-	function RandomData(fromNum,toNum){ 
-		return parseInt(Math.random()*(toNum-fromNum) + fromNum); 
-	}
-	
-	function transformData(dataSet,name){ 
-		var object = {};
-		if(typeof name == 'undefined'){
-			var dataPart = dataSet[0];
-			object.id = dataPart.id;
-			object.name = dataPart.name;
-			object.children = dataPart.friends;
-		}else{
-			$.each(dataSet,function(i,user){
-				if(name == user.name){
-					var dataPart = dataSet[i];
-					object.id = dataPart.id;
-					object.name = dataPart.name;
-					object.children = dataPart.friends;
-				}
-			});
-		}
-
-		return object;
-	}
-	
-	function fRandomBy(under, over){ 
-		switch(arguments.length){ 
-			case 1: return parseInt(Math.random()*under+1); 
-			case 2: return parseInt(Math.random()*(over-under+1) + under); 
-			default: return 0; 
-		} 
-	} 
 	
 	function weightSort(a,b){
 		return a.weight>b.weight ? 1 :-1;
