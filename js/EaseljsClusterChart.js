@@ -14,12 +14,12 @@ var smr = smr || {};
 	EaseljsClusterChart.prototype.postDisplay = function(data, config) {
 		var view = this;
 		var $e = view.$el;
-		var dataSet = app.createDataSet(3000);
-		view.dataSet = dataSet;
-		data = app.transformData(dataSet);
-		view.showView(data);
 		createjs.Ticker.useRAF = true;
 		createjs.Ticker.setFPS(55);
+
+		app.ContactDao.get().done(function(chartData){
+        	view.showView(chartData);
+		});
 	}
 	
 	EaseljsClusterChart.prototype.showView = function(data){
@@ -48,7 +48,7 @@ var smr = smr || {};
 	      var stage = view.stage;
 	      var baseLineLength = 20;
 	      var centerX = 400;
-	      var centerY = 400;
+	      var centerY = 300;
 	      var angle = (360/data.children.length)*(Math.PI/180);
 	      var container = new createjs.Container();
 	      data.children.sort(weightSort);
@@ -67,45 +67,54 @@ var smr = smr || {};
 		        
 		        //draw the node text
 				var text = new createjs.Text(cData.name, "10px Arial", "#777");
-				var deviation = getDeviationForNodeText(data.children.length,i);
-				text.x = cx + deviation.mx;
-				text.y = cy + deviation.my;
+				text.x = cx - 20;
+				text.y = cy + 10;
 				container.addChild(text);
 	      });
 	      
 	      //draw the center node
-	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName);
+	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id);
 	      container.addChild(centerCircle);
+	      centerCircle.addEventListener("click",centerCircleClickEvent);
 	      
 		  //draw the center node text
 		  var centerText = new createjs.Text(data.name, "10px Arial", "#777");
-		  centerText.x = centerX+10;
-		  centerText.y = centerX+10;
+		  centerText.x = centerX-20;
+		  centerText.y = centerY+10;
 		  container.addChild(centerText);
 		  
 	      return container;
 	}
 	
 	
+	function centerCircleClickEvent(evt) {
+		app.ContactDao.get(evt.target.nid).done(function(chartData){
+			var html = hrender("tmpl-popover-right",{name:chartData.name,num:chartData.children.length,left:evt.rawX+4,top:evt.rawY-38});
+        	$(".EaseljsClusterChart").append(html);
+		});
+	}
+	
+	
     function createNodeCircle(cx,cy,cName){
         var r = 7;
         var circle = new createjs.Shape();
-        circle.graphics.beginRadialGradientFill(["#FCA000","#F8F28A"],[0,1], 0, 0, r, 0, 0, 0).drawCircle(0, 0, r);
-        circle.graphics.beginStroke("#FB4100").drawCircle(0, 0, r+1);
+        circle.graphics.beginFill("#d9eefe").drawCircle(0, 0, r);
+        circle.graphics.beginStroke("#979ca3").drawCircle(0, 0, r+1);
         circle.x = cx;
         circle.y = cy;
         circle.name = cName;
         return circle;
     }
       
-    function createCenterCircle(centerX,centerY,cName){
-	    var r = 10;
+    function createCenterCircle(centerX,centerY,cName,nid){
+	    var r = 7;
 	    var circle = new createjs.Shape();
-	    circle.graphics.beginStroke("#cccccc").drawCircle(0, 0, r+1);
-	    circle.graphics.beginLinearGradientFill(["#006400","#6DA202"],[0,1], 0, 0, r, 0, 0, 0).drawCircle(0, 0, r);
+	    circle.graphics.beginStroke("#a4998e").drawCircle(0, 0, r+1);
+	    circle.graphics.beginFill("#ffe9c2").drawCircle(0, 0, r);
 	    circle.name = cName;
 	    circle.x = centerX;
 	    circle.y = centerY;
+	    circle.nid = nid;
 	    return circle;
    }
       
@@ -132,7 +141,7 @@ var smr = smr || {};
 	      var centerY = newCenterCircle.y;
 
 	      //create new Container
-	      var newData = app.transformData(view.dataSet, circleNode.name);
+	      var newData = app.transformData(app.dataSet, circleNode.name);
 	      var newContainer = createContainer.call(view, newData);
 	      newContainer.name = view.newContainerName;
 	      newContainer.x = circleNode.x - centerX;
@@ -147,25 +156,22 @@ var smr = smr || {};
 	      var x1 = newCircle.x;
 	      var y1 = newCircle.y;
 	      
-	      function tick(event) {
-		        var oldContainer = stage.getChildByName(view.currentContainerName);
-		        var newContainer = stage.getChildByName(view.newContainerName);
-		        oldContainer.alpha = oldContainer.alpha - 0.05;
-		        newContainer.alpha = newContainer.alpha + 0.05;
-		        oldContainer.x =  oldContainer.x - ((x1 - x0) /20);
-		        oldContainer.y =  oldContainer.y - ((y1 - y0) /20);
-		        newContainer.x =  newContainer.x - ((x1 - x0) /20);
-		        newContainer.y =  newContainer.y - ((y1 - y0) /20);
-		        stage.update(event);
-		        
-		        if(oldContainer.alpha <= 0){
-		          animationEnd.call(view);
-		          stage.update(event);
-		        }
+	      var ox = oldContainer.x - (x1 - x0);
+	      var oy = oldContainer.y - (y1 - y0);
+	      createjs.CSSPlugin.install(createjs.Tween);
+	      createjs.Tween.get(oldContainer).to({alpha : 0, x : ox, y : oy }, app.time, createjs.Ease.quartInOut); 
+	      createjs.Tween.get(newContainer).to({alpha : 1, x : 0 , y : 0  }, app.time, createjs.Ease.quartInOut).call(animationEnd); 
+	      var $popover = $(".popover");
+	      if($popover.size()>0){
+	    	  var position = $popover.eq(0).position();
+	    	  var popx = position.left -(x1 - x0);
+	    	  var popy = position.top  -(y1 - y0);
+	    	  createjs.Tween.get($popover[0]).to({opacity : 0.1, left : popx , top : popy }, app.time,createjs.Ease.quartInOut)
+	    	  .call(function(){$popover.remove();});
 	      }
 	      
 	      function animationEnd(){
-		        createjs.Ticker.removeEventListener("tick",tick);
+		        createjs.Ticker.removeEventListener("tick",view.stage);
 		        var oldContainer = stage.getChildByName(view.currentContainerName);
 		        var newContainer = stage.getChildByName(view.newContainerName);
 		        newContainer.x = 0;
@@ -175,36 +181,7 @@ var smr = smr || {};
 		        newContainer.alpha = 1;
 	      }
 
-	      createjs.Ticker.addEventListener("tick", tick);
-	}
-   
-	function getDeviationForNodeText(length,index){
-		var mx = 0;
-		var my = 0;
-		var ang = (360/length)*index;
-		if(ang <= 45){
-			mx = 15;
-			my = -6;
-		}else if(ang > 45 && ang <= 90){
-			mx = 2;
-			my = 7;
-		}else if(ang > 90 && ang <= 180){
-			mx = -50;
-			my = -6;
-		}else if(ang > 180 && ang <= 225){
-			mx = -50;
-			my = -5;
-		}else if(ang > 225 && ang <= 270){
-			mx = -50;
-			my = -15;
-		}else if(ang > 270 && ang <= 315){
-			mx = 10;
-			my = -20;
-		}else if(ang > 315 && ang < 360){
-			mx = 10;
-			my = -10;
-		}
-		return {mx:mx,my:my};
+	      createjs.Ticker.addEventListener("tick", stage);
 	}
 	
 	function weightSort(a,b){
