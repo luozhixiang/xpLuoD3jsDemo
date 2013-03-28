@@ -1,0 +1,31 @@
+<script id="tmpl-EaselJSTweenClusterChart" type="text/html">
+	<div class="EaselJSTweenClusterChart">
+		<canvas width="800" height="800"></canvas>
+		<div class="customize-info">
+			<div class="customize-item">
+				<span>Use RequestAnimationFrame:</span>
+				<div class="btn-group btn-raf">
+				  <button class="btn" data-on="true">On</button>
+				  <button class="btn" data-on="false">Off</button>
+				</div>
+			</div>
+			<div class="customize-item">
+				<span>Speed Of Animation(Integer):</span>
+				<div class="btn-group btn-soa">
+	                  <input type="text" id="soa" value="{{time}}" >
+	            </div>
+			</div>
+		</div>
+		<div class="contact-info"></div>
+	</div>
+</script>
+
+<script id="tmpl-popover-right" type="text/html">
+<div class="popover fade right in" style="top: {{top}}px; left: {{left}}px; display: block;">
+	<div class="arrow"></div>
+	<h3 class="popover-title">Name:{{name}}</h3>
+	<div class="popover-content">Friends Number:{{num}}</div>
+</div>
+</script>
+
+

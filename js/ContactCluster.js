@@ -18,7 +18,7 @@
 		},
 		showView:function(data,transform){
 			var view = this;
-            var $e = view.$el;
+            var $e = view.$element;
             view.curData = data;
             
 			var $container = $e.find(".ContactClusterSummary");
