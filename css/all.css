@@ -242,4 +242,18 @@ body {
   position: absolute;
   z-index: 2;
 }
+.ForceDirectedCluster {
+  background-color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  overflow: auto;
+  position: relative;
+}
+.ForceDirectedCluster canvas {
+  float: left;
+}
+.ForceDirectedCluster .contact-info {
+  position: absolute;
+  z-index: 2;
+}
 

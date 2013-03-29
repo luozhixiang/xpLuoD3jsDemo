@@ -6,7 +6,7 @@ var app = app || {};
 	app.time = 800;
 	
 	//create the data set
-	app.dataSet = app.createDataSet(300);
+	app.dataSet = app.createDataSet(300,3,6);
 	
 	app.ContactDao = brite.registerDao(new brite.dao.ContactDaoHandler("Contact"));
 	

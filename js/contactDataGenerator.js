@@ -87,7 +87,7 @@
 	  *           children:[{id:..,name:..,weight:..},{..}]
 	  *          }
 	  */
-	app.transformData = function(dataSet,name){ 
+	app.transformData = function(dataSet,name,fname){ 
 		var object = {};
 		if(typeof name == 'undefined'){
 			var dataPart = dataSet[0];
@@ -103,6 +103,15 @@
 					object.children = dataPart.friends;
 				}
 			});
+			var tchildren = [];
+			var index = 0;
+			console.log(fname+"------------");
+			$.each(object.children,function(i,it){
+				if(it.name==fname) index = i;
+			});
+			tchildren  = tchildren.concat(object.children.slice(index,object.children.length)).concat(object.children.slice(0,index));
+			object.children = tchildren;
+			
 		}
 
 		return object;

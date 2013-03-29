@@ -13,7 +13,7 @@
             
             d3.select(".Welcome")
 		      .style("width", "0%")
-		      .text("Welcome to the D3JS Chart Demo!")
+		      .text("Welcome to the Contact Cluster Demo!")
 	    	  .transition()
 		      .ease("bounce")
 		      .duration(2000)
