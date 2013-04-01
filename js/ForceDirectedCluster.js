@@ -33,7 +33,7 @@ var smr = smr || {};
         view.cName = "centerCircle";
         view.originPoint = {x:300,y:400};
 	      
-        var container = createContainer.call(view, data, view.originPoint, true, 0);
+        var container = createContainer.call(view, data, view.originPoint, 3, 0);
         container.name = view.currentContainerName;
         stage.addChild(container);
         stage.update();		
@@ -43,17 +43,22 @@ var smr = smr || {};
 	
 	// --------- Private Method --------- //
 	
-	function createContainer(data,centerPosition,needChild,exAngle){
+	function createContainer(data,centerPosition,level,exAngle){
 	      var view = this;
 	      var stage = view.stage;
-	      var baseLineLength = 15;
+	      var baseLineLength = 20;
+	      if(level==2){
+	    	  baseLineLength = 15;
+	      }else if(level==1){
+	    	  baseLineLength = 10;
+	      }
 	      var centerX = centerPosition ? centerPosition.x:300;
 	      var centerY = centerPosition ? centerPosition.y:400;
 	      var angle = (360/data.children.length)*(Math.PI/180);
 	      var container = new createjs.Container();
 	      data.children.sort(weightSort);
 	      $.each(data.children,function(i,cData){
-	    	  	if(!needChild && i==0){
+	    	  	if(level!=3 && i==0){
 	    	  	}else{
 			        var weight = cData.weight > 4 ? cData.weight : cData.weight;
 			        var l = weight * baseLineLength;
@@ -61,28 +66,28 @@ var smr = smr || {};
 			        var cy = centerY + l * Math.cos(angle * i+exAngle);	
 			        
 			        //draw the node and the line
-			        var line = createLine.call(view,centerX,centerY,cx,cy,needChild);
-			        var node = createNodeCircle.call(view,cx,cy,cData.name);
+			        var line = createLine.call(view,centerX,centerY,cx,cy,level);
+			        var node = createNodeCircle.call(view,cx,cy,cData.name,level);
 			        container.addChild(line);
 			        container.addChild(node);
 			        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
 			        
-					if(needChild){
+					if((level-1)>0){
 						//draw the node text
 						var text = new createjs.Text(cData.name, "10px Arial", "#777");
 						text.x = cx - 20;
 						text.y = cy + 10;
 						container.addChild(text);
 						
-						var newData = app.transformData(app.dataSet, cData.name,data.name);
-						var newContainer = createContainer.call(view, newData,{x:cx,y:cy},false,(Math.PI+angle * i));
+						var newData = app.transformData(app.dataSet, cData.name, data.name);
+						var newContainer = createContainer.call(view, newData,{x:cx,y:cy}, level-1,(Math.PI+angle * i)+exAngle);
 						container.addChild(newContainer);
 					}
 	    	  	}
 				
 	      });
 	      
-	      if(needChild){
+	      if(level==3){
 		      //draw the center node
 		      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id);
 		      container.addChild(centerCircle);
@@ -111,10 +116,16 @@ var smr = smr || {};
 	}
 	
 	
-    function createNodeCircle(cx,cy,cName){
+    function createNodeCircle(cx,cy,cName,level){
         var r = 7;
         var circle = new createjs.Shape();
-        circle.graphics.beginFill("#d9eefe").drawCircle(0, 0, r);
+        var color = "#d9eefe";
+        if(level==3){
+        	color = "#f60";
+        }else if(level==2){
+        	color = "#0B95B1";
+        }
+        circle.graphics.beginFill(color).drawCircle(0, 0, r);
         circle.graphics.beginStroke("#979ca3").drawCircle(0, 0, r+1);
         circle.x = cx;
         circle.y = cy;
@@ -134,11 +145,13 @@ var smr = smr || {};
 	    return circle;
    }
       
-   function createLine(x0, y0, x1, y1,needChild){
+   function createLine(x0, y0, x1, y1,level){
         var line = new createjs.Shape();
         var color = "#cccccc";
-        if(needChild){
+        if(level==3){
         	color = "#f60";
+        }else if(level==2){
+        	color = "#0B95B1";
         }
         line.graphics.beginStroke(color).moveTo(x0,y0).lineTo(x1,y1);
         return line;
@@ -162,7 +175,7 @@ var smr = smr || {};
 
 	      //create new Container
 	      var newData = app.transformData(app.dataSet, circleNode.name);
-	      var newContainer = createContainer.call(view, newData, view.originPoint, true, 0);
+	      var newContainer = createContainer.call(view, newData, view.originPoint, 3, 0);
 	      newContainer.name = view.newContainerName;
 	      newContainer.x = circleNode.x - centerX;
 	      newContainer.y = circleNode.y - centerY;
