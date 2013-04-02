@@ -31,7 +31,7 @@ var smr = smr || {};
         view.currentContainerName = "currentContainer";
         view.newContainerName = "newContainer";
         view.cName = "centerCircle";
-        view.originPoint = {x:300,y:400};
+        view.originPoint = {x:500,y:300};
 	      
         var container = createContainer.call(view, data, view.originPoint, 3, 0);
         container.name = view.currentContainerName;
@@ -48,9 +48,9 @@ var smr = smr || {};
 	      var stage = view.stage;
 	      var baseLineLength = 20;
 	      if(level==2){
-	    	  baseLineLength = 15;
-	      }else if(level==1){
 	    	  baseLineLength = 10;
+	      }else if(level==1){
+	    	  baseLineLength = 5;
 	      }
 	      var centerX = centerPosition ? centerPosition.x:300;
 	      var centerY = centerPosition ? centerPosition.y:400;
@@ -60,7 +60,7 @@ var smr = smr || {};
 	      $.each(data.children,function(i,cData){
 	    	  	if(level!=3 && i==0){
 	    	  	}else{
-			        var weight = cData.weight > 4 ? cData.weight : cData.weight;
+			        var weight = cData.weight ;
 			        var l = weight * baseLineLength;
 			        var cx = centerX + l * Math.sin(angle * i+exAngle);
 			        var cy = centerY + l * Math.cos(angle * i+exAngle);	
@@ -71,6 +71,7 @@ var smr = smr || {};
 			        container.addChild(line);
 			        container.addChild(node);
 			        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
+			        
 			        
 					if((level-1)>0){
 						//draw the node text
@@ -87,10 +88,10 @@ var smr = smr || {};
 				
 	      });
 	      
+	      //draw the center node
+	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id);
+	      container.addChild(centerCircle);
 	      if(level==3){
-		      //draw the center node
-		      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id);
-		      container.addChild(centerCircle);
 		      centerCircle.addEventListener("click",centerCircleClickEvent);
 		      //draw the center node text
 		      var centerText = new createjs.Text(data.name, "10px Arial", "#777");
