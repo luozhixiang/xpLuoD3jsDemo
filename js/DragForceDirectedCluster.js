@@ -127,9 +127,7 @@ var smr = smr || {};
 			                
 			        	});
 			        }
-			        if(level-1==0){
-			        	node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
-			        }
+			        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
 			        
 			        
 			        //draw the node text
