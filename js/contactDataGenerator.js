@@ -94,6 +94,7 @@
 			object.id = dataPart.id;
 			object.name = dataPart.name;
 			object.children = dataPart.friends;
+			object.children.sort(weightSort);
 		}else{
 			$.each(dataSet,function(i,user){
 				if(name == user.name){
@@ -106,6 +107,7 @@
 			var tchildren = [];
 			var index = 0;
 			console.log(fname+"------------");
+			object.children.sort(weightSort);
 			$.each(object.children,function(i,it){
 				if(it.name==fname) index = i;
 			});
@@ -115,4 +117,8 @@
 		}
 
 		return object;
+	}
+	
+	function weightSort(a,b){
+		return a.weight>b.weight ? 1 :-1;
 	}

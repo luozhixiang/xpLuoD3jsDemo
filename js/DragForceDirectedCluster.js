@@ -3,25 +3,25 @@ var smr = smr || {};
 (function($){
 		
 	// --------- Component Interface Implementation ---------- //
-	function ForceDirectedCluster(){};
-	smr.ForceDirectedCluster = ForceDirectedCluster; 
+	function DragForceDirectedCluster(){};
+	smr.DragForceDirectedCluster = DragForceDirectedCluster; 
   
-	ForceDirectedCluster.prototype.create = function(data,config){
-		var html = hrender("tmpl-ForceDirectedCluster",{time:app.time});
+	DragForceDirectedCluster.prototype.create = function(data,config){
+		var html = hrender("tmpl-DragForceDirectedCluster",{time:app.time});
 		return $(html);
 	}
 		
-	ForceDirectedCluster.prototype.postDisplay = function(data, config) {
+	DragForceDirectedCluster.prototype.postDisplay = function(data, config) {
 		var view = this;
 		var $e = view.$element;
-		createjs.Ticker.setFPS(55);
+		createjs.Ticker.setFPS(1000);
 		createjs.Ticker.useRAF = true;
 		app.ContactDao.get().done(function(chartData){
         	view.showView(chartData);
 		});
 	}
 	
-	ForceDirectedCluster.prototype.showView = function(data){
+	DragForceDirectedCluster.prototype.showView = function(data){
 		var view = this;
 		var $e = view.$element;
 		var canvas = $e.find("canvas").get(0);
@@ -32,8 +32,9 @@ var smr = smr || {};
         view.newContainerName = "newContainer";
         view.cName = "centerCircle";
         view.originPoint = {x:500,y:300};
+        view.level = 2;
 	      
-        var container = createContainer.call(view, data, view.originPoint, 3, 0);
+        var container = createContainer.call(view, data, view.originPoint, view.level, 0);
         container.name = view.currentContainerName;
         stage.addChild(container);
         stage.update();		
@@ -47,10 +48,8 @@ var smr = smr || {};
 	      var view = this;
 	      var stage = view.stage;
 	      var baseLineLength = 20;
-	      if(level==2){
-	    	  baseLineLength = 10;
-	      }else if(level==1){
-	    	  baseLineLength = 5;
+	      if(level==1){
+	    	  baseLineLength = 8;
 	      }
 	      var centerX = centerPosition ? centerPosition.x:300;
 	      var centerY = centerPosition ? centerPosition.y:400;
@@ -58,7 +57,7 @@ var smr = smr || {};
 	      var container = new createjs.Container();
 	      //data.children.sort(weightSort);
 	      $.each(data.children,function(i,cData){
-	    	  	if(level!=3 && i==0){
+	    	  	if(level!=view.level && i==0){
 	    	  	}else{
 			        var weight = cData.weight ;
 			        var l = weight * baseLineLength;
@@ -70,18 +69,81 @@ var smr = smr || {};
 			        var node = createNodeCircle.call(view,cx,cy,cData.name,level);
 			        container.addChild(line);
 			        container.addChild(node);
-			        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
+			        if(level-1==1){
+			        	node.relatedLine = line;
+			        	
+			        	node.addEventListener("mousedown",function(evt){
+			                var target = evt.target;
+			                var ox = target.x;
+			                console.log(target.x+"========---------------");
+			                var oy = target.y;
+			                var relatedContainer = target.relatedContainer;
+			                var relatedText = target.relatedText;
+			                var relatedLine = target.relatedLine;
+			                var offset = {x:target.x-evt.stageX, y:target.y-evt.stageY};
+			                
+			                evt.addEventListener("mousemove",function(ev) {
+			                    var offsetX = ev.stageX - target.x + offset.x;
+			                    var offsetY = ev.stageY - target.y + offset.y;
+			                    target.x = ev.stageX+offset.x;
+			                    target.y = ev.stageY+offset.y;
+			                    relatedContainer.x = relatedContainer.x+ offsetX;
+			                    relatedContainer.y = relatedContainer.y+ offsetY;
+			                    relatedText.x = relatedText.x+ offsetX;
+			                    relatedText.y = relatedText.y+ offsetY;
+			                    reDrawLine.call(view,relatedLine,target.x,target.y);
+			                    stage.update();
+			                });
+			                
+			                evt.addEventListener("mouseup",function(ev) {
+			                  var perX = (target.originPotint.cx - target.x) /10;
+			                  var perY = (target.originPotint.cy - target.y) /10;
+			                  createjs.Ticker.addEventListener("tick", tick);
+			                  console.log(target.x+"========"+perX+"------------------------");
+			                  var count = 10;
+			          	      function tick(event) {
+			      		          target.x = target.x + perX;
+			      		          target.y = target.y + perY;
+			      		          relatedContainer.x = relatedContainer.x+perX;
+			      		          relatedContainer.y = relatedContainer.y+perY;
+			      		          relatedText.x = relatedText.x + perX;
+			      		          relatedText.y = relatedText.y + perY;
+			      		          reDrawLine.call(view,relatedLine,relatedLine.x1+perX,relatedLine.y1+perY);
+			      		          stage.update();
+			      		          count--;
+				      		      if(count <= 0){
+				      		    	  createjs.Ticker.removeEventListener("tick",tick);
+				      		          target.x = target.originPotint.cx;
+				      		          target.y = target.originPotint.cy;
+				      		          relatedContainer.x = 0;
+				      		          relatedContainer.y = 0;
+				      		          relatedText.x = relatedText.originPotint.x;
+				      		          relatedText.y = relatedText.originPotint.y;
+				      		          reDrawLine.call(view,relatedLine,target.originPotint.cx,target.originPotint.cy);
+				      		          stage.update();
+				      		      }
+			          	      }
+			                });
+			                
+			        	});
+			        }
+			        if(level-1==0){
+			        	node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
+			        }
 			        
+			        
+			        //draw the node text
+			        var text = new createjs.Text(cData.name, "10px Arial", "#777");
+			        text.x = cx - 20;
+			        text.y = cy + 10;
+			        text.originPotint = {x:cx - 20,y:cy + 10};
+			        node.relatedText = text;
+			        container.addChild(text);
 			        
 					if((level-1)>0){
-						//draw the node text
-						var text = new createjs.Text(cData.name, "10px Arial", "#777");
-						text.x = cx - 20;
-						text.y = cy + 10;
-						container.addChild(text);
-						
 						var newData = app.transformData(app.dataSet, cData.name, data.name);
 						var newContainer = createContainer.call(view, newData,{x:cx,y:cy}, level-1,(Math.PI+angle * i)+exAngle);
+						node.relatedContainer = newContainer;
 						container.addChild(newContainer);
 					}
 	    	  	}
@@ -91,7 +153,7 @@ var smr = smr || {};
 	      //draw the center node
 	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id);
 	      container.addChild(centerCircle);
-	      if(level==3){
+	      if(level==view.level){
 		      centerCircle.addEventListener("click",centerCircleClickEvent);
 		      //draw the center node text
 		      var centerText = new createjs.Text(data.name, "10px Arial", "#777");
@@ -103,13 +165,21 @@ var smr = smr || {};
 	      return container;
 	}
 	
+    function reDrawLine(line,offsetX,offsetY) {
+        var view = this;
+        var lineClone = {x0:line.x0+0, y0:line.y0+0, x1:line.x1+0, y1:line.y1+0};
+        line.graphics.clear().beginStroke("#0B95B1").moveTo(lineClone.x0, lineClone.y0).lineTo(offsetX, offsetY);
+        line.x1 = offsetX;
+        line.y1 = offsetY;
+    }
+	
 	
 	function centerCircleClickEvent(evt) {
 		var $popover = $(".popover");
 		if($popover.size()==0){
 			app.ContactDao.get(evt.target.nid).done(function(chartData){
 				var html = hrender("tmpl-popover-right",{name:chartData.name,num:chartData.children.length,left:evt.rawX+4,top:evt.rawY-38});
-	        	$(".ForceDirectedCluster").append(html);
+	        	$(".DragForceDirectedCluster").append(html);
 			});
 		}else{
 			$popover.remove();
@@ -130,6 +200,7 @@ var smr = smr || {};
         circle.graphics.beginStroke("#979ca3").drawCircle(0, 0, r+1);
         circle.x = cx;
         circle.y = cy;
+        circle.originPotint = {cx:cx,cy:cy};
         circle.name = cName;
         return circle;
     }
@@ -155,6 +226,10 @@ var smr = smr || {};
         	color = "#0B95B1";
         }
         line.graphics.beginStroke(color).moveTo(x0,y0).lineTo(x1,y1);
+        line.x0 = x0;
+        line.y0 = y0;
+        line.x1 = x1;
+        line.y1 = y1;
         return line;
    }
 	
@@ -176,7 +251,7 @@ var smr = smr || {};
 
 	      //create new Container
 	      var newData = app.transformData(app.dataSet, circleNode.name);
-	      var newContainer = createContainer.call(view, newData, view.originPoint, 3, 0);
+	      var newContainer = createContainer.call(view, newData, view.originPoint, view.level, 0);
 	      newContainer.name = view.newContainerName;
 	      newContainer.x = circleNode.x - centerX;
 	      newContainer.y = circleNode.y - centerY;
@@ -230,11 +305,11 @@ var smr = smr || {};
 	// --------- /Private Method --------- //
 	
 	// --------- Component Registration --------- //
-	brite.registerView("ForceDirectedCluster",{
+	brite.registerView("DragForceDirectedCluster",{
 		emptyParent: true
 	},
 	function(){
-		return new smr.ForceDirectedCluster();
+		return new smr.DragForceDirectedCluster();
 	});	
 	// --------- /Component Registration --------- //
 	
