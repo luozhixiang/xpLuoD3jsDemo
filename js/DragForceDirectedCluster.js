@@ -75,7 +75,6 @@ var smr = smr || {};
 			        	node.addEventListener("mousedown",function(evt){
 			                var target = evt.target;
 			                var ox = target.x;
-			                console.log(target.x+"========---------------");
 			                var oy = target.y;
 			                var relatedContainer = target.relatedContainer;
 			                var relatedText = target.relatedText;

@@ -3,12 +3,16 @@
 		<canvas width="800" height="800"></canvas>
 		<div class="contact-info"></div>
 		<div class="slider-container">
-		    <div class="slider zoomSlider"></div>
-			<label style="color:#777">Zoom:<span class="zoom-value">1</span></label>
+			<label>Level: <span class="level-value">2</span></label>
+			<div class="toolbar-item-content level">
+				<input type="text" class="span2" data-slider-min="1" data-slider-max="4" data-slider-value="2" data-slider-step="1" value="" />
+			</div>
 		</div>
 		<div class="slider-container">
-		    <div class="slider levelSlider"></div>
-			<label style="color:#777">Level:<span class="level-value">3</span></label>
+			<label>Zoom: <span class="zoom-value">10</span></label> 
+			<div class="toolbar-item-content zoom">
+				<input type="text" class="span2" data-slider-min="1" data-slider-max="15" data-slider-value="10" data-slider-step="1" value="" />
+			</div>
 		</div>
 	</div>
 </script>

@@ -5,6 +5,7 @@ var smr = smr || {};
 	// --------- Component Interface Implementation ---------- //
 	function ZoomCluster(){};
 	smr.ZoomCluster = ZoomCluster; 
+	var _baseLineLen = [20,10,5,3];
   
 	ZoomCluster.prototype.create = function(data,config){
 		var html = hrender("tmpl-ZoomCluster",{time:app.time});
@@ -21,23 +22,13 @@ var smr = smr || {};
         	view.showView(chartData);
 		});
 		
-		$(".zoomSlider").slider({
-			value: view.scale,
-			min: 0,
-			max: 1.5,
-			step: 0.1,
-			slide : function(){sliderChange.call(view,this);},
-			change: function(){sliderChange.call(view,this);}
+		$e.find(".zoom input").slider().off('slide').on('slide', function(ev){
+			sliderChange.call(view,ev);
 		});
 		
-        $(".levelSlider").slider({
-            value: 3,
-            min: 2,
-            max: 5,
-            step: 1,
-            slide : function(){levelSliderChange.call(view,this);},
-            change: function(){levelSliderChange.call(view,this);}
-        });
+		$e.find(".level input").slider().off('slide').on('slide', function(ev){
+			levelSliderChange.call(view,ev);
+		});
 		
 	}
 	
@@ -66,16 +57,14 @@ var smr = smr || {};
 	
 	function createContainer(data,centerPosition,level,exAngle){
 	      var view = this;
+	      if(level==view.level) view.rootName = data.name;
 	      var stage = view.stage;
-	      var baseLineLength = 20;
-	      if(level==1){
-	    	  baseLineLength = 8;
-	      }
+	      var baseLineLength = _baseLineLen[view.level - level];
+	      
 	      var centerX = centerPosition ? centerPosition.x:300;
 	      var centerY = centerPosition ? centerPosition.y:400;
 	      var angle = (360/data.children.length)*(Math.PI/180);
 	      var container = new createjs.Container();
-	      //data.children.sort(weightSort);
 	      $.each(data.children,function(i,cData){
 	    	  	if(level!=view.level && i==0){
 	    	  	}else{
@@ -89,74 +78,18 @@ var smr = smr || {};
 			        var node = createNodeCircle.call(view,cx,cy,cData.name,level);
 			        container.addChild(line);
 			        container.addChild(node);
-			        if(level-1==1){
-			        	node.relatedLine = line;
-			        	
-			        	node.addEventListener("mousedown",function(evt){
-			                var target = evt.target;
-			                var ox = target.x;
-			                console.log(target.x+"========---------------");
-			                var oy = target.y;
-			                var relatedContainer = target.relatedContainer;
-			                var relatedText = target.relatedText;
-			                var relatedLine = target.relatedLine;
-			                var offset = {x:target.x-evt.stageX, y:target.y-evt.stageY};
-			                
-			                evt.addEventListener("mousemove",function(ev) {
-			                    var offsetX = ev.stageX - target.x + offset.x;
-			                    var offsetY = ev.stageY - target.y + offset.y;
-			                    target.x = ev.stageX+offset.x;
-			                    target.y = ev.stageY+offset.y;
-			                    relatedContainer.x = relatedContainer.x+ offsetX;
-			                    relatedContainer.y = relatedContainer.y+ offsetY;
-			                    relatedText.x = relatedText.x+ offsetX;
-			                    relatedText.y = relatedText.y+ offsetY;
-			                    reDrawLine.call(view,relatedLine,target.x,target.y);
-			                    stage.update();
-			                });
-			                
-			                evt.addEventListener("mouseup",function(ev) {
-			                  var perX = (target.originPotint.cx - target.x) /10;
-			                  var perY = (target.originPotint.cy - target.y) /10;
-			                  createjs.Ticker.addEventListener("tick", tick);
-			                  console.log(target.x+"========"+perX+"------------------------");
-			                  var count = 10;
-			          	      function tick(event) {
-			      		          target.x = target.x + perX;
-			      		          target.y = target.y + perY;
-			      		          relatedContainer.x = relatedContainer.x+perX;
-			      		          relatedContainer.y = relatedContainer.y+perY;
-			      		          relatedText.x = relatedText.x + perX;
-			      		          relatedText.y = relatedText.y + perY;
-			      		          reDrawLine.call(view,relatedLine,relatedLine.x1+perX,relatedLine.y1+perY);
-			      		          stage.update();
-			      		          count--;
-				      		      if(count <= 0){
-				      		    	  createjs.Ticker.removeEventListener("tick",tick);
-				      		          target.x = target.originPotint.cx;
-				      		          target.y = target.originPotint.cy;
-				      		          relatedContainer.x = 0;
-				      		          relatedContainer.y = 0;
-				      		          relatedText.x = relatedText.originPotint.x;
-				      		          relatedText.y = relatedText.originPotint.y;
-				      		          reDrawLine.call(view,relatedLine,target.originPotint.cx,target.originPotint.cy);
-				      		          stage.update();
-				      		      }
-			          	      }
-			                });
-			                
-			        	});
-			        }
 			        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
 			        
 			        
 			        //draw the node text
-			        var text = new createjs.Text(cData.name, "10px Arial", "#777");
-			        text.x = cx - 20;
-			        text.y = cy + 10;
-			        text.originPotint = {x:cx - 20,y:cy + 10};
-			        node.relatedText = text;
-			        container.addChild(text);
+			        if(view.level-level<=1){
+			        	var text = new createjs.Text(cData.name, "10px Arial", "#777");
+			        	text.x = cx - 20;
+			        	text.y = cy + 10;
+			        	text.originPotint = {x:cx - 20,y:cy + 10};
+			        	node.relatedText = text;
+			        	container.addChild(text);
+			        }
 			        
 					if((level-1)>0){
 						var newData = app.transformData(app.dataSet, cData.name, data.name);
@@ -187,8 +120,8 @@ var smr = smr || {};
 	
 	function sliderChange(slider){
 		var view = this;
-		var stage = view.stage
-		var value = $(slider).slider("option", "value");
+		var value = parseFloat(slider.value)/10;
+		var stage = view.stage;
 		view.scale = value;
 		var bmp = stage.getChildByName(view.currentContainerName);
 		bmp.scaleX = bmp.scaleY = value;
@@ -200,7 +133,16 @@ var smr = smr || {};
 	
 	function levelSliderChange(slider){
 		var view = this;
-        var value = $(slider).slider("option", "value");
+        var value = parseFloat(slider.value);
+        var stage = view.stage;
+        view.level = value;
+        var newData = app.transformData(app.dataSet, view.rootName);
+        var newContainer = createContainer.call(view, newData, view.originPoint, view.level, 0);
+        var oldContainer = stage.getChildByName(view.currentContainerName);
+        newContainer.name = view.currentContainerName;
+        stage.removeChild(oldContainer);
+        stage.addChild(newContainer);
+        stage.update();
         view.$element.find(".level-value").text(value);
 	}
 	
@@ -227,7 +169,7 @@ var smr = smr || {};
 	
 	
     function createNodeCircle(cx,cy,cName,level){
-        var r = 7;
+        var r = 5;
         var circle = new createjs.Shape();
         var color = "#d9eefe";
         if(level==3){
@@ -245,7 +187,7 @@ var smr = smr || {};
     }
       
     function createCenterCircle(centerX,centerY,cName,nid){
-	    var r = 7;
+	    var r = 5;
 	    var circle = new createjs.Shape();
 	    circle.graphics.beginStroke("#a4998e").drawCircle(0, 0, r+1);
 	    circle.graphics.beginFill("#ffe9c2").drawCircle(0, 0, r);

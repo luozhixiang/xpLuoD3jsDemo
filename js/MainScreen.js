@@ -10,7 +10,7 @@
             var view = this;
             var $e = view.$el;
             view.$container = $e.find(".MainScreen-main");
-            brite.display("Welcome");
+            brite.display("ZoomCluster",view.$container);
         },
         
         events:{
