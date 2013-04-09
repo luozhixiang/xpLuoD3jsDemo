@@ -31,7 +31,7 @@
 				friend.parentId = i;
 				friend.id = userId;
 				friend.name = "User" + userId;
-				friend.weight = RandomData(5,10);
+				friend.weight = RandomData(1,10);
 				friendsArr.push(friend);
 			}
 			data.friends = friendsArr;

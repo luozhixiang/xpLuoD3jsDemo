@@ -2,10 +2,14 @@ var smr = smr || {};
 
 (function($){
 		
+	var _weightPerLength = [20,10,8,4];
+	var _baseLineLen = [80,40,20,10];
+	var _colors = ["#0B95B1","#ff7f0e","#aec7e8","#dddddd"];
+	var _centerColors = ["#ffe9c2","#0B95B1","#ff7f0e","#aec7e8","#dddddd"];
+	
 	// --------- Component Interface Implementation ---------- //
 	function ZoomCluster(){};
 	smr.ZoomCluster = ZoomCluster; 
-	var _baseLineLen = [20,10,5,3];
   
 	ZoomCluster.prototype.create = function(data,config){
 		var html = hrender("tmpl-ZoomCluster",{time:app.time});
@@ -17,16 +21,16 @@ var smr = smr || {};
 		var $e = view.$element;
 		createjs.Ticker.setFPS(1000);
 		createjs.Ticker.useRAF = true;
-		view.scale = 1;
+		view.scale = 0.8;
 		app.ContactDao.get().done(function(chartData){
         	view.showView(chartData);
 		});
 		
-		$e.find(".zoom input").slider().off('slide').on('slide', function(ev){
+		$e.find(".zoom input").slider().off('slideStop').on('slideStop', function(ev){
 			sliderChange.call(view,ev);
 		});
 		
-		$e.find(".level input").slider().off('slide').on('slide', function(ev){
+		$e.find(".level input").slider().off('slideStop').on('slideStop', function(ev){
 			levelSliderChange.call(view,ev);
 		});
 		
@@ -60,16 +64,17 @@ var smr = smr || {};
 	      if(level==view.level) view.rootName = data.name;
 	      var stage = view.stage;
 	      var baseLineLength = _baseLineLen[view.level - level];
-	      
+	      var weightPerLength = _weightPerLength[view.level - level];
 	      var centerX = centerPosition ? centerPosition.x:300;
 	      var centerY = centerPosition ? centerPosition.y:400;
 	      var angle = (360/data.children.length)*(Math.PI/180);
 	      var container = new createjs.Container();
+	      if(level==view.level) data.children.sort(weightSort);
 	      $.each(data.children,function(i,cData){
 	    	  	if(level!=view.level && i==0){
 	    	  	}else{
-			        var weight = cData.weight ;
-			        var l = weight * baseLineLength;
+			        var weight = 10 - cData.weight ;
+			        var l = weight * weightPerLength + baseLineLength;
 			        var cx = centerX + l * Math.sin(angle * i+exAngle);
 			        var cy = centerY + l * Math.cos(angle * i+exAngle);	
 			        
@@ -169,14 +174,10 @@ var smr = smr || {};
 	
 	
     function createNodeCircle(cx,cy,cName,level){
+    	var view = this;
         var r = 5;
         var circle = new createjs.Shape();
-        var color = "#d9eefe";
-        if(level==3){
-        	color = "#f60";
-        }else if(level==2){
-        	color = "#0B95B1";
-        }
+        var color = _colors[view.level - level];
         circle.graphics.beginFill(color).drawCircle(0, 0, r);
         circle.graphics.beginStroke("#979ca3").drawCircle(0, 0, r+1);
         circle.x = cx;
