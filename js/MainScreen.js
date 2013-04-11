@@ -11,10 +11,11 @@
             var $e = view.$el;
             view.$container = $e.find(".MainScreen-main");
             brite.display("ZoomCluster",view.$container);
+            	//$('.dropdown-toggle').dropdown("toggle");
         },
         
         events:{
-        	"click; .MainScreen-header .navbar-inner .nav li":function(event){
+        	"click; .MainScreen-header .navbar-inner .nav li.menu":function(event){
         		var view = this;
         		var $this = $(event.currentTarget);
         		var chart = $this.attr("data-nav");

@@ -19,7 +19,7 @@ var smr = smr || {};
 	ZoomCluster.prototype.postDisplay = function(data, config) {
 		var view = this;
 		var $e = view.$element;
-		createjs.Ticker.setFPS(1000);
+		createjs.Ticker.setFPS(800);
 		createjs.Ticker.useRAF = true;
 		view.scale = 0.8;
 		app.ContactDao.get().done(function(chartData){
@@ -170,7 +170,7 @@ var smr = smr || {};
 	      });
 	      
 	      //draw the center node
-	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id);
+	      var centerCircle = createCenterCircle.call(view,centerX,centerY,view.cName,data.id,level);
 	      container.addChild(centerCircle);
 	      if(level==view.level){
 		      centerCircle.addEventListener("click",centerCircleClickEvent);
@@ -216,8 +216,8 @@ var smr = smr || {};
 	
     function reDrawLine(line,offsetX,offsetY) {
         var view = this;
-        var lineClone = {x0:line.x0+0, y0:line.y0+0, x1:line.x1+0, y1:line.y1+0};
-        line.graphics.clear().beginStroke("#0B95B1").moveTo(lineClone.x0, lineClone.y0).lineTo(offsetX, offsetY);
+        var lineClone = {x0:line.x0+0, y0:line.y0+0, x1:line.x1+0, y1:line.y1+0,color:line.color};
+        line.graphics.clear().beginStroke(lineClone.color).moveTo(lineClone.x0, lineClone.y0).lineTo(offsetX, offsetY);
         line.x1 = offsetX;
         line.y1 = offsetY;
     }
@@ -250,11 +250,13 @@ var smr = smr || {};
         return circle;
     }
       
-    function createCenterCircle(centerX,centerY,cName,nid){
+    function createCenterCircle(centerX,centerY,cName,nid,level){
+    	var view = this;
 	    var r = 5;
 	    var circle = new createjs.Shape();
+	    var color = _centerColors[view.level - level];
 	    circle.graphics.beginStroke("#a4998e").drawCircle(0, 0, r+1);
-	    circle.graphics.beginFill("#ffe9c2").drawCircle(0, 0, r);
+	    circle.graphics.beginFill(color).drawCircle(0, 0, r);
 	    circle.name = cName;
 	    circle.x = centerX;
 	    circle.y = centerY;
@@ -263,18 +265,15 @@ var smr = smr || {};
    }
       
    function createLine(x0, y0, x1, y1,level){
+	    var view = this;
         var line = new createjs.Shape();
-        var color = "#cccccc";
-        if(level==3){
-        	color = "#f60";
-        }else if(level==2){
-        	color = "#0B95B1";
-        }
+        var color = _colors[view.level - level];
         line.graphics.beginStroke(color).moveTo(x0,y0).lineTo(x1,y1);
         line.x0 = x0;
         line.y0 = y0;
         line.x1 = x1;
         line.y1 = y1;
+        line.color = color;
         return line;
    }
 	
@@ -301,7 +300,6 @@ var smr = smr || {};
 	      newContainer.x = newContainer.x + (circleNode.x - centerX)* view.scale;
 	      newContainer.y = newContainer.y + (circleNode.y - centerY)* view.scale;
 	      
-	      console.log(newContainer.x+"|------------------|"+newContainer.y);
 	      newContainer.alpha = 0;
 	      stage.addChild(newContainer);
 	      stage.update();
@@ -325,11 +323,6 @@ var smr = smr || {};
 	    	  var popy = position.top  -(y1 - y0);
 	    	  createjs.Tween.get($popover[0]).to({opacity : 0.01, left : popx , top : popy }, app.time,createjs.Ease.quartInOut).call(function(){$popover.remove();});
 	      }
-	      
-//	     var $contactInfo = view.$el.find(".contact-info");
-//		 $contactInfo.html('<span class="label label-info">'+newData.name+": "+newData.children.length+' friends</span>')
-//    	 			 .css({"top":circleNode.y-10,"left":circleNode.x+20});
-//	     createjs.Tween.get($contactInfo[0]).to({left : centerX+10 , top : centerY-10 }, app.time,createjs.Ease.quartInOut);
 	     
 	      
 	      function animationEnd(){
