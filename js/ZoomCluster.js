@@ -84,68 +84,72 @@ var smr = smr || {};
 			        container.addChild(line);
 			        container.addChild(node);
 			        
-			        if(level-1>=1 && level-1 <=(view.level-1)){
-			        	node.relatedLine = line;
-			        	
-			        	node.addEventListener("mousedown",function(evt){
-			                var target = evt.target;
-			                var ox = target.x;
-			                var oy = target.y;
-			                var relatedContainer = target.relatedContainer;
-			                var relatedText = target.relatedText;
-			                var relatedLine = target.relatedLine;
-			                var offset = {x:target.x-evt.stageX, y:target.y-evt.stageY};
-			                
-			                evt.addEventListener("mousemove",function(ev) {
-			                    var offsetX = ev.stageX - target.x + offset.x;
-			                    var offsetY = ev.stageY - target.y + offset.y;
-			                    target.x = ev.stageX+offset.x;
-			                    target.y = ev.stageY+offset.y;
+		        	node.relatedLine = line;
+		        	node.addEventListener("mousedown",function(evt){
+		                var target = evt.target;
+		                var ox = target.x;
+		                var oy = target.y;
+		                var relatedContainer = target.relatedContainer;
+		                var relatedText = target.relatedText;
+		                var relatedLine = target.relatedLine;
+		                var offset = {x:target.x-evt.stageX, y:target.y-evt.stageY};
+		                
+		                evt.addEventListener("mousemove",function(ev) {
+		                    var offsetX = ev.stageX - target.x + offset.x;
+		                    var offsetY = ev.stageY - target.y + offset.y;
+		                    target.x = ev.stageX+offset.x;
+		                    target.y = ev.stageY+offset.y;
+		                    if(relatedContainer){
 			                    relatedContainer.x = relatedContainer.x+ offsetX;
 			                    relatedContainer.y = relatedContainer.y+ offsetY;
-			                    if(relatedText){
-			                    	relatedText.x = relatedText.x+ offsetX;
-			                    	relatedText.y = relatedText.y+ offsetY;
-			                    }
-			                    reDrawLine.call(view,relatedLine,target.x,target.y);
-			                    stage.update();
-			                });
-			                
-			                evt.addEventListener("mouseup",function(ev) {
-			                  var perX = (target.originPotint.cx - target.x) /20;
-			                  var perY = (target.originPotint.cy - target.y) /20;
-			                  createjs.Ticker.addEventListener("tick", tick);
-			                  var count = 20;
-			          	      function tick(event) {
-			      		          target.x = target.x + perX;
-			      		          target.y = target.y + perY;
+		                    }
+		                    if(relatedText){
+		                    	relatedText.x = relatedText.x+ offsetX;
+		                    	relatedText.y = relatedText.y+ offsetY;
+		                    }
+		                    reDrawLine.call(view,relatedLine,target.x,target.y);
+		                    stage.update();
+		                });
+		                
+		                evt.addEventListener("mouseup",function(ev) {
+		                  var perX = (target.originPotint.cx - target.x) /20;
+		                  var perY = (target.originPotint.cy - target.y) /20;
+		                  createjs.Ticker.addEventListener("tick", tick);
+		                  var count = 20;
+		          	      function tick(event) {
+		      		          target.x = target.x + perX;
+		      		          target.y = target.y + perY;
+			      		      if(relatedContainer){
 			      		          relatedContainer.x = relatedContainer.x+perX;
 			      		          relatedContainer.y = relatedContainer.y+perY;
-			      		          if(relatedText){
-			      		        	  relatedText.x = relatedText.x + perX;
-			      		        	  relatedText.y = relatedText.y + perY;
-			      		          }
-			      		          reDrawLine.call(view,relatedLine,relatedLine.x1+perX,relatedLine.y1+perY);
-			      		          stage.update();
-			      		          count--;
-				      		      if(count <= 0){
-				      		    	  createjs.Ticker.removeEventListener("tick",tick);
-				      		          target.x = target.originPotint.cx;
-				      		          target.y = target.originPotint.cy;
+			      		      }
+		      		          if(relatedText){
+		      		        	  relatedText.x = relatedText.x + perX;
+		      		        	  relatedText.y = relatedText.y + perY;
+		      		          }
+		      		          reDrawLine.call(view,relatedLine,relatedLine.x1+perX,relatedLine.y1+perY);
+		      		          stage.update();
+		      		          count--;
+			      		      if(count <= 0){
+			      		    	  createjs.Ticker.removeEventListener("tick",tick);
+			      		          target.x = target.originPotint.cx;
+			      		          target.y = target.originPotint.cy;
+				      		      if(relatedContainer){
 				      		          relatedContainer.x = 0;
 				      		          relatedContainer.y = 0;
-				      		          if(relatedText){
-					      		          relatedText.x = relatedText.originPotint.x;
-					      		          relatedText.y = relatedText.originPotint.y;
-				      		          }
-				      		          reDrawLine.call(view,relatedLine,target.originPotint.cx,target.originPotint.cy);
-				      		          stage.update();
 				      		      }
-			          	      }
-			                });
-			                
-			        	});
-			        }
+			      		          if(relatedText){
+				      		          relatedText.x = relatedText.originPotint.x;
+				      		          relatedText.y = relatedText.originPotint.y;
+			      		          }
+			      		          reDrawLine.call(view,relatedLine,target.originPotint.cx,target.originPotint.cy);
+			      		          stage.update();
+			      		      }
+		          	      }
+		                });
+		                
+		        	});
+			        
 			        node.addEventListener("click",function(evt){nodeClickEvent.call(view,evt.target);});
 			        
 			        
@@ -281,12 +285,12 @@ var smr = smr || {};
 	      var view = this;
 	      var stage = view.stage;
 	      var oldContainer = stage.getChildByName(view.currentContainerName);
-	      var newCircle = createCenterCircle.call(view,circleNode.x,circleNode.y);
+	      var newCircle = createCenterCircle.call(view,circleNode.x,circleNode.y,view.level);
 	      oldContainer.removeChild(circleNode);
 	      oldContainer.addChild(newCircle);
 
 	      var oldCenterCircle = oldContainer.getChildByName(view.cName);
-	      var newCenterCircle = createNodeCircle.call(view,oldCenterCircle.x,oldCenterCircle.y,view.cName);
+	      var newCenterCircle = createNodeCircle.call(view,oldCenterCircle.x,oldCenterCircle.y,view.cName,view.level);
 	      oldContainer.removeChild(oldCenterCircle);
 	      oldContainer.addChild(newCenterCircle);
 	      
