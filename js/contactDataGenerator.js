@@ -119,6 +119,16 @@
 		return object;
 	}
 	
+	app.transformDataFirst = function(dataSet,name){ 
+		var children = [];
+		var index = 0;
+		$.each(dataSet,function(i,it){
+			if(it.name==name) index = i;
+		});
+		children  = children.concat(dataSet.slice(index,index+1)).concat(dataSet.slice(0,index)).concat(dataSet.slice(index+1));
+		return children;
+	}
+	
 	function weightSort(a,b){
 		return a.weight>b.weight ? 1 :-1;
 	}

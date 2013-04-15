@@ -145,5 +145,5 @@ Handlebars.templates['tmpl-ZoomCluster'] = Handlebars.template(function (Handleb
   
 
 
-  return "<div class=\"ZoomCluster\">\n		<canvas width=\"800\" height=\"800\"></canvas>\n		<div class=\"contact-info\"></div>\n		<div class=\"slider-container\">\n			<label>Level: <span class=\"level-value\">2</span></label>\n			<div class=\"toolbar-item-content level\"></div>\n			<label>Zoom: <span class=\"zoom-value\">1.0</span></label> \n			<div class=\"toolbar-item-content zoom\"></div>\n		</div>\n	</div>";}
+  return "<div class=\"ZoomCluster\">\n		<canvas width=\"800\" height=\"800\"></canvas>\n		<div class=\"contact-info\"></div>\n		<div class=\"slider-container\">\n			<label>Level: <span class=\"level-value\">1</span></label>\n			<div class=\"toolbar-item-content level\"></div>\n			<label>Zoom: <span class=\"zoom-value\">1.0</span></label> \n			<div class=\"toolbar-item-content zoom\"></div>\n		</div>\n	</div>";}
 );

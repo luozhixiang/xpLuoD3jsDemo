@@ -48,11 +48,12 @@ var smr = smr || {};
 		var stage = new createjs.Stage(canvas);
 		
         view.stage = stage;
+        view.rootName = data.name;
         view.currentContainerName = "currentContainer";
         view.newContainerName = "newContainer";
         view.cName = "centerCircle";
         view.originPoint = {x:350,y:300};
-        view.level = 2;
+        view.level = 1;
 	      
         var container = createContainer.call(view, data, view.originPoint, view.level, 0);
         container.name = view.currentContainerName;
@@ -64,7 +65,7 @@ var smr = smr || {};
 	
 	// --------- Private Method --------- //
 	
-	function createContainer(data,centerPosition,level,exAngle){
+	function createContainer(data,centerPosition,level,exAngle,isRecreate){
 	      var view = this;
 	      if(level==view.level) view.rootName = data.name;
 	      var stage = view.stage;
@@ -75,6 +76,10 @@ var smr = smr || {};
 	      var angle = (360/data.children.length)*(Math.PI/180);
 	      var container = new createjs.Container();
 	      if(level==view.level) data.children.sort(weightSort);
+	      
+	      //put the root data as the first one
+	      data.children = app.transformDataFirst(data.children,isRecreate?view.oldRootName:view.rootName);
+	      
 	      $.each(data.children,function(i,cData){
 	    	  	if(level!=view.level && i==0){
 	    	  	}else{
@@ -88,8 +93,9 @@ var smr = smr || {};
 			        var node = createNodeCircle.call(view,cx,cy,cData.name,level);
 			        container.addChild(line);
 			        container.addChild(node);
-			        
 		        	node.relatedLine = line;
+		        	node.angleVal = angle * i+exAngle;
+		        	
 		        	node.addEventListener("mousedown",function(evt){
 		                var target = evt.target;
 		                var ox = target.x;
@@ -289,6 +295,8 @@ var smr = smr || {};
    function nodeClickEvent(circleNode) {
 	      var view = this;
 	      var stage = view.stage;
+	      view.oldRootName = view.rootName;
+	      view.rootName = circleNode.name;
 	      var oldContainer = stage.getChildByName(view.currentContainerName);
 	      var newCircle = createCenterCircle.call(view,circleNode.x,circleNode.y,view.level);
 	      oldContainer.removeChild(circleNode);
@@ -304,7 +312,7 @@ var smr = smr || {};
 
 	      //create new Container
 	      var newData = app.transformData(app.dataSet, circleNode.name);
-	      var newContainer = createContainer.call(view, newData, view.originPoint, view.level, 0);
+	      var newContainer = createContainer.call(view, newData, view.originPoint, view.level, (Math.PI+circleNode.angleVal),true);
 	      newContainer.name = view.newContainerName;
 	      newContainer.x = newContainer.x + (circleNode.x - centerX)* view.scale;
 	      newContainer.y = newContainer.y + (circleNode.y - centerY)* view.scale;
