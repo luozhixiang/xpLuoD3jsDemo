@@ -278,16 +278,12 @@ body {
   z-index: 2;
 }
 .ZoomCluster .slider-container {
-  float: left;
+  position: absolute;
   margin-left: 10px;
+  top: 280px;
+  left: 800px;
 }
 .ZoomCluster .slider-container .slider {
   width: 200px;
-  top: 350px;
-}
-.ZoomCluster .slider-container label {
-  position: absolute;
-  top: 330px;
-  width: 100px;
 }
 

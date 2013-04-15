@@ -145,5 +145,5 @@ Handlebars.templates['tmpl-ZoomCluster'] = Handlebars.template(function (Handleb
   
 
 
-  return "<div class=\"ZoomCluster\">\n		<canvas width=\"800\" height=\"800\"></canvas>\n		<div class=\"contact-info\"></div>\n		<div class=\"slider-container\">\n			<label>Level: <span class=\"level-value\">2</span></label>\n			<div class=\"toolbar-item-content level\">\n				<input type=\"text\" class=\"span2\" data-slider-min=\"1\" data-slider-max=\"4\" data-slider-value=\"2\" data-slider-step=\"1\" value=\"\" />\n			</div>\n		</div>\n		<div class=\"slider-container\">\n			<label>Zoom: <span class=\"zoom-value\">10</span></label> \n			<div class=\"toolbar-item-content zoom\">\n				<input type=\"text\" class=\"span2\" data-slider-min=\"1\" data-slider-max=\"15\" data-slider-value=\"10\" data-slider-step=\"1\" value=\"\" />\n			</div>\n		</div>\n	</div>";}
+  return "<div class=\"ZoomCluster\">\n		<canvas width=\"800\" height=\"800\"></canvas>\n		<div class=\"contact-info\"></div>\n		<div class=\"slider-container\">\n			<label>Level: <span class=\"level-value\">2</span></label>\n			<div class=\"toolbar-item-content level\"></div>\n			<label>Zoom: <span class=\"zoom-value\">1.0</span></label> \n			<div class=\"toolbar-item-content zoom\"></div>\n		</div>\n	</div>";}
 );

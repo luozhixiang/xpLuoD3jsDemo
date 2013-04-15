@@ -26,12 +26,17 @@ var smr = smr || {};
         	view.showView(chartData);
 		});
 		
-		$e.find(".zoom input").slider().off('slideStop').on('slideStop', function(ev){
-			sliderChange.call(view,ev);
+		$e.find(".level").slider({
+			value:2,min: 1,max: 4,step: 1,
+			slide: function(event, ui) {
+				levelSliderChange.call(view,event,ui);
+			}
 		});
-		
-		$e.find(".level input").slider().off('slideStop').on('slideStop', function(ev){
-			levelSliderChange.call(view,ev);
+		$e.find(".zoom").slider({
+			value:1,min: 0.1,max: 1.5,step: 0.1,
+			slide: function(event, ui) {
+				sliderChange.call(view,event,ui);
+			}
 		});
 		
 	}
@@ -190,9 +195,9 @@ var smr = smr || {};
 	      return container;
 	}
 	
-	function sliderChange(slider){
+	function sliderChange(event,slider){
 		var view = this;
-		var value = parseFloat(slider.value)/10;
+		var value = slider.value;
 		var stage = view.stage;
 		view.scale = value;
 		var bmp = stage.getChildByName(view.currentContainerName);
@@ -203,7 +208,7 @@ var smr = smr || {};
 		view.$element.find(".zoom-value").text(slider.value);
 	}
 	
-	function levelSliderChange(slider){
+	function levelSliderChange(event,slider){
 		var view = this;
         var value = parseFloat(slider.value);
         var stage = view.stage;
