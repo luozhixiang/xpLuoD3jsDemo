@@ -5,7 +5,6 @@
 }
 
 .MainScreen .MainScreen-main{
-  	top:50px;
   	overflow:auto;
 }
 
@@ -15,6 +14,10 @@
 
 .MainScreen .navbar-fixed-top{
 	position:relative;
+}
+
+.MainScreen-header .navbar{
+	margin-bottom: 3px;
 }
 
 .MainScreen .MainScreen-header .navbar-inner .brand{
@@ -30,4 +33,39 @@
 	text-decoration: none;
 	height:100%;
 	color:#ffffff;
+}
+
+.MainScreen .ControlBar {
+    margin-top:10px;
+    border-bottom: 1px solid #ccc;
+	height: 30px;
+}
+
+.MainScreen .ControlBar .control-item {
+	float:left;
+	margin-left:20px;
+}
+
+.MainScreen .ControlBar .control-item label{
+	display: inline;
+	float:left;
+	cursor: default;
+	font-weight:bold;
+}
+
+.MainScreen .ControlBar .control-item > div{
+	float:left;
+}
+
+.MainScreen .ControlBar .control-item > div.slider{
+	margin-top: 3px;
+}
+
+.MainScreen .ControlBar .control-item .speed-value{
+	font-size: 14px;
+}
+
+.MainScreen .ControlBar .control-item .speed-change-input{
+	height: 14px;
+	width: 44px;
 }

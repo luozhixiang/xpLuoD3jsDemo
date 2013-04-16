@@ -6,6 +6,8 @@ var smr = smr || {};
 	var _baseLineLen = [80,40,20,10];
 	var _colors = ["#0B95B1","#ff7f0e","#aec7e8","#dddddd"];
 	var _centerColors = ["#ffe9c2","#0B95B1","#ff7f0e","#aec7e8","#dddddd"];
+	var updateHelperHtml = '<input class="speed-change-input"/>';
+
 	
 	// --------- Component Interface Implementation ---------- //
 	function ZoomCluster(){};
@@ -21,6 +23,12 @@ var smr = smr || {};
 		var $e = view.$element;
 		createjs.Ticker.setFPS(800);
 		createjs.Ticker.useRAF = true;
+		$e.find(".speed-value").text(app.time);
+		$e.find(".raf-value").attr("checked",createjs.Ticker.useRAF);
+        var $canvas = $e.find("canvas");
+        $canvas[0].width = $e.parent().width();
+        $canvas[0].height = $(window).height()-90;
+		
 		view.scale = 0.8;
 		app.ContactDao.get().done(function(chartData){
         	view.showView(chartData);
@@ -52,13 +60,45 @@ var smr = smr || {};
         view.currentContainerName = "currentContainer";
         view.newContainerName = "newContainer";
         view.cName = "centerCircle";
-        view.originPoint = {x:350,y:300};
+        view.originPoint = {x:canvas.width/2,y:canvas.height/2};
         view.level = 1;
 	      
         var container = createContainer.call(view, data, view.originPoint, view.level, 0);
         container.name = view.currentContainerName;
         stage.addChild(container);
         stage.update();		
+	}
+	
+	ZoomCluster.prototype.events = {
+		"btap; .ControlBar .control-item .speed-value":function(event){
+			var $span = $(event.currentTarget);
+			if(!$span.hasClass("editing")){
+				var text = $span.text();
+				var $updateHelperHtml = $(updateHelperHtml).val(text);
+				$span.html($updateHelperHtml);
+				$span.addClass("editing");
+				$updateHelperHtml.focus();
+				$updateHelperHtml.on("keyup", function(event){
+					if (event.which === 13){
+						app.time = this.value;
+						$span.removeClass("editing").html(this.value);
+					}else if (event.which === 27) {
+						$span.removeClass("editing").html(text);
+					}
+				});
+			}
+		},
+		
+		"change; .ControlBar .control-item .raf-value":function(event){
+			var $this = $(event.currentTarget);
+			if($this.attr("checked")){
+				$this.removeAttr("checked");
+				createjs.Ticker.useRAF = false;
+			}else{
+				$this.attr("checked",true);
+				createjs.Ticker.useRAF = true;
+			}
+		}
 	}
 	
 	// --------- /Component Interface Implementation ---------- //
@@ -211,7 +251,7 @@ var smr = smr || {};
 		bmp.x = (1-value)*view.originPoint.x; 
 		bmp.y = (1-value)*view.originPoint.y; 
 		stage.update();
-		view.$element.find(".zoom-value").text(slider.value);
+		view.$element.find(".slider-zoom-value").text((value==1?"1.0":value));
 	}
 	
 	function levelSliderChange(event,slider){
@@ -226,7 +266,7 @@ var smr = smr || {};
         stage.removeChild(oldContainer);
         stage.addChild(newContainer);
         stage.update();
-        view.$element.find(".level-value").text(value);
+        view.$element.find(".slider-level-value").text(value);
 	}
 	
     function reDrawLine(line,offsetX,offsetY) {

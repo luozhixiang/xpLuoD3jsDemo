@@ -119,7 +119,6 @@ body {
   height: 100%;
 }
 .MainScreen .MainScreen-main {
-  top: 50px;
   overflow: auto;
 }
 .MainScreen .MainScreen-header {
@@ -127,6 +126,9 @@ body {
 }
 .MainScreen .navbar-fixed-top {
   position: relative;
+}
+.MainScreen-header .navbar {
+  margin-bottom: 3px;
 }
 .MainScreen .MainScreen-header .navbar-inner .brand {
   margin-left: 0px;
@@ -141,6 +143,34 @@ body {
   text-decoration: none;
   height: 100%;
   color: #ffffff;
+}
+.MainScreen .ControlBar {
+  margin-top: 10px;
+  border-bottom: 1px solid #ccc;
+  height: 30px;
+}
+.MainScreen .ControlBar .control-item {
+  float: left;
+  margin-left: 20px;
+}
+.MainScreen .ControlBar .control-item label {
+  display: inline;
+  float: left;
+  cursor: default;
+  font-weight: bold;
+}
+.MainScreen .ControlBar .control-item > div {
+  float: left;
+}
+.MainScreen .ControlBar .control-item > div.slider {
+  margin-top: 3px;
+}
+.MainScreen .ControlBar .control-item .speed-value {
+  font-size: 14px;
+}
+.MainScreen .ControlBar .control-item .speed-change-input {
+  height: 14px;
+  width: 44px;
 }
 .Welcome {
   height: 50px;
@@ -270,18 +300,12 @@ body {
   overflow: auto;
   position: relative;
 }
-.ZoomCluster canvas {
-  float: left;
-}
 .ZoomCluster .contact-info {
   position: absolute;
   z-index: 2;
 }
 .ZoomCluster .slider-container {
-  position: absolute;
   margin-left: 10px;
-  top: 280px;
-  left: 800px;
 }
 .ZoomCluster .slider-container .slider {
   width: 200px;
