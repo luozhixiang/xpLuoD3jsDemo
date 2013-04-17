@@ -106,7 +106,6 @@
 			});
 			var tchildren = [];
 			var index = 0;
-			console.log(fname+"------------");
 			object.children.sort(weightSort);
 			$.each(object.children,function(i,it){
 				if(it.name==fname) index = i;

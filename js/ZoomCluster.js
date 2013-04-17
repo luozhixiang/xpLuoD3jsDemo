@@ -6,7 +6,6 @@ var smr = smr || {};
 	var _baseLineLen = [80,40,20,10];
 	var _colors = ["#0B95B1","#ff7f0e","#aec7e8","#dddddd"];
 	var _centerColors = ["#ffe9c2","#0B95B1","#ff7f0e","#aec7e8","#dddddd"];
-	var updateHelperHtml = '<input class="speed-change-input"/>';
 
 	
 	// --------- Component Interface Implementation ---------- //
@@ -21,32 +20,13 @@ var smr = smr || {};
 	ZoomCluster.prototype.postDisplay = function(data, config) {
 		var view = this;
 		var $e = view.$element;
-		createjs.Ticker.setFPS(800);
-		createjs.Ticker.useRAF = true;
-		$e.find(".speed-value").text(app.time);
-		$e.find(".raf-value").attr("checked",createjs.Ticker.useRAF);
         var $canvas = $e.find("canvas");
         $canvas[0].width = $e.parent().width();
         $canvas[0].height = $(window).height()-90;
-		
-		view.scale = 0.8;
+        
 		app.ContactDao.get().done(function(chartData){
         	view.showView(chartData);
 		});
-		
-		$e.find(".level").slider({
-			value:2,min: 1,max: 4,step: 1,
-			slide: function(event, ui) {
-				levelSliderChange.call(view,event,ui);
-			}
-		});
-		$e.find(".zoom").slider({
-			value:1,min: 0.1,max: 1.5,step: 0.1,
-			slide: function(event, ui) {
-				sliderChange.call(view,event,ui);
-			}
-		});
-		
 	}
 	
 	ZoomCluster.prototype.showView = function(data){
@@ -54,50 +34,41 @@ var smr = smr || {};
 		var $e = view.$element;
 		var canvas = $e.find("canvas").get(0);
 		var stage = new createjs.Stage(canvas);
-		
         view.stage = stage;
         view.rootName = data.name;
         view.currentContainerName = "currentContainer";
         view.newContainerName = "newContainer";
         view.cName = "centerCircle";
         view.originPoint = {x:canvas.width/2,y:canvas.height/2};
-        view.level = 1;
+        view.level = app.level;
+        view.scale = app.scale;
 	      
+        stage.clear();
         var container = createContainer.call(view, data, view.originPoint, view.level, 0);
         container.name = view.currentContainerName;
         stage.addChild(container);
         stage.update();		
 	}
 	
-	ZoomCluster.prototype.events = {
-		"btap; .ControlBar .control-item .speed-value":function(event){
-			var $span = $(event.currentTarget);
-			if(!$span.hasClass("editing")){
-				var text = $span.text();
-				var $updateHelperHtml = $(updateHelperHtml).val(text);
-				$span.html($updateHelperHtml);
-				$span.addClass("editing");
-				$updateHelperHtml.focus();
-				$updateHelperHtml.on("keyup", function(event){
-					if (event.which === 13){
-						app.time = this.value;
-						$span.removeClass("editing").html(this.value);
-					}else if (event.which === 27) {
-						$span.removeClass("editing").html(text);
-					}
-				});
-			}
+	ZoomCluster.prototype.docEvents = {
+		"DO_SLIDE_LEVEL": function(event,extra){
+			var view = this;
+			view.level = extra.level;
+			levelSliderChange.call(view,extra.level);
 		},
-		
-		"change; .ControlBar .control-item .raf-value":function(event){
-			var $this = $(event.currentTarget);
-			if($this.attr("checked")){
-				$this.removeAttr("checked");
-				createjs.Ticker.useRAF = false;
-			}else{
-				$this.attr("checked",true);
-				createjs.Ticker.useRAF = true;
-			}
+		"DO_SLIDE_ZOOM": function(event,extra){
+			var view = this;
+			view.scale = extra.scale;
+			sliderZoomChange.call(view, extra.scale);
+		}
+	}
+	
+	ZoomCluster.prototype.daoEvents = {
+		"dataChange; Contact": function(){
+			var view = this;
+			app.ContactDao.get().done(function(chartData){
+	        	view.showView(chartData);
+			});
 		}
 	}
 	
@@ -241,24 +212,19 @@ var smr = smr || {};
 	      return container;
 	}
 	
-	function sliderChange(event,slider){
+	function sliderZoomChange(scale){
 		var view = this;
-		var value = slider.value;
 		var stage = view.stage;
-		view.scale = value;
 		var bmp = stage.getChildByName(view.currentContainerName);
-		bmp.scaleX = bmp.scaleY = value;
-		bmp.x = (1-value)*view.originPoint.x; 
-		bmp.y = (1-value)*view.originPoint.y; 
+		bmp.scaleX = bmp.scaleY = view.scale;
+		bmp.x = (1-view.scale)*view.originPoint.x; 
+		bmp.y = (1-view.scale)*view.originPoint.y; 
 		stage.update();
-		view.$element.find(".slider-zoom-value").text((value==1?"1.0":value));
 	}
 	
-	function levelSliderChange(event,slider){
+	function levelSliderChange(level){
 		var view = this;
-        var value = parseFloat(slider.value);
         var stage = view.stage;
-        view.level = value;
         var newData = app.transformData(app.dataSet, view.rootName);
         var newContainer = createContainer.call(view, newData, view.originPoint, view.level, 0);
         var oldContainer = stage.getChildByName(view.currentContainerName);
@@ -266,7 +232,6 @@ var smr = smr || {};
         stage.removeChild(oldContainer);
         stage.addChild(newContainer);
         stage.update();
-        view.$element.find(".slider-level-value").text(value);
 	}
 	
     function reDrawLine(line,offsetX,offsetY) {

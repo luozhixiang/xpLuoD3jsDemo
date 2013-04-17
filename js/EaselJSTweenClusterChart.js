@@ -7,17 +7,17 @@ var smr = smr || {};
 	smr.EaselJSTweenClusterChart = EaselJSTweenClusterChart; 
   
 	EaselJSTweenClusterChart.prototype.create = function(data,config){
-		var html = hrender("tmpl-EaselJSTweenClusterChart",{time:app.time});
+		var html = hrender("tmpl-EaselJSTweenClusterChart",{});
 		return $(html);
 	}
 		
 	EaselJSTweenClusterChart.prototype.postDisplay = function(data, config) {
 		var view = this;
 		var $e = view.$element;
-		view.$timeSoa = $e.find(".btn-soa input"); 
-		createjs.Ticker.setFPS(55);
-		createjs.Ticker.useRAF = true;
-		$e.find(".btn-raf .btn[data-on="+createjs.Ticker.useRAF+"]").addClass("active").siblings().removeClass("active");
+        var $canvas = $e.find("canvas");
+        $canvas[0].width = $e.parent().width();
+        $canvas[0].height = $(window).height()-90;
+		
 		app.ContactDao.get().done(function(chartData){
         	view.showView(chartData);
 		});
@@ -33,25 +33,12 @@ var smr = smr || {};
         view.currentContainerName = "currentContainer";
         view.newContainerName = "newContainer";
         view.cName = "centerCircle";
+        view.originPoint = {x:canvas.width/2,y:canvas.height/2};
 	      
         var container = createContainer.call(view,data);
         container.name = view.currentContainerName;
         stage.addChild(container);
         stage.update();		
-	}
-	
-	EaselJSTweenClusterChart.prototype.events = {
-			
-		"click ; .btn-raf .btn" :function(event){
-			var $this = $(event.currentTarget);
-			var onOff = $this.attr("data-on");
-			$this.addClass("active").siblings().removeClass("active");
-			if(onOff=="true"){
-				createjs.Ticker.useRAF = true;
-			}else{
-				createjs.Ticker.useRAF = false;
-			}
-		}
 	}
 	
 	// --------- /Component Interface Implementation ---------- //
@@ -62,8 +49,8 @@ var smr = smr || {};
 	      var view = this;
 	      var stage = view.stage;
 	      var baseLineLength = 20;
-	      var centerX = 400;
-	      var centerY = 300;
+	      var centerX = view.originPoint ? view.originPoint.x:300;
+	      var centerY = view.originPoint ? view.originPoint.y:400;
 	      var angle = (360/data.children.length)*(Math.PI/180);
 	      var container = new createjs.Container();
 	      data.children.sort(weightSort);
@@ -175,7 +162,6 @@ var smr = smr || {};
 	      var y0 = centerY;
 	      var x1 = newCircle.x;
 	      var y1 = newCircle.y;
-	      app.time = view.$timeSoa.val();
 	      
 	      var ox = oldContainer.x - (x1 - x0);
 	      var oy = oldContainer.y - (y1 - y0);

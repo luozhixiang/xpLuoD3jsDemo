@@ -3,6 +3,13 @@ body {
   background: #fff;
   overflow: hidden;
 }
+.fitparent {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
 .tipsy {
   font-size: 10px;
   position: absolute;
@@ -153,6 +160,9 @@ body {
   float: left;
   margin-left: 20px;
 }
+.MainScreen .ControlBar .control-item.width170 {
+  width: 170px;
+}
 .MainScreen .ControlBar .control-item label {
   display: inline;
   float: left;
@@ -171,6 +181,10 @@ body {
 .MainScreen .ControlBar .control-item .speed-change-input {
   height: 14px;
   width: 44px;
+}
+.MainScreen .ControlBar .control-item .new-data .btn {
+  height: 22px;
+  padding: 0 10px;
 }
 .Welcome {
   height: 50px;
@@ -265,34 +279,6 @@ body {
   position: absolute;
   z-index: 2;
 }
-.ForceDirectedCluster {
-  background-color: #ffffff;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  overflow: auto;
-  position: relative;
-}
-.ForceDirectedCluster canvas {
-  float: left;
-}
-.ForceDirectedCluster .contact-info {
-  position: absolute;
-  z-index: 2;
-}
-.DragForceDirectedCluster {
-  background-color: #ffffff;
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 13px;
-  overflow: auto;
-  position: relative;
-}
-.DragForceDirectedCluster canvas {
-  float: left;
-}
-.DragForceDirectedCluster .contact-info {
-  position: absolute;
-  z-index: 2;
-}
 .ZoomCluster {
   background-color: ##efefef;
   font-family: Arial, Helvetica, sans-serif;
@@ -309,5 +295,16 @@ body {
 }
 .ZoomCluster .slider-container .slider {
   width: 200px;
+}
+.EaselJSForceClusterSlider2 {
+  background-color: ##efefef;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  overflow: auto;
+  position: relative;
+}
+.EaselJSForceClusterSlider2 .contact-info {
+  position: absolute;
+  z-index: 2;
 }
 
