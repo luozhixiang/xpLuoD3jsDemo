@@ -45,7 +45,7 @@
 	    		$e.find("li.nav-menu").removeClass("active");
 	    		$li.addClass("active");
 	    		var menu = $li.attr("data-nav");
-	    		
+	    		$e.find(".ControlBar").hide();
 	    		if(menu == "D3JS"){
 	    			$e.find("li.EaselJS").hide();
 	    		  	$e.find("li.D3JS").show();
@@ -58,8 +58,9 @@
 	        		brite.display("ZoomCluster",view.$container);
 	        		$e.find(".nav > li").removeClass("active");
 	        		$e.find(".nav > li.menu[data-nav='ZoomCluster']").addClass("active");
+	        		$e.find(".ControlBar").show();
 	    		}
-	    		$li.closest(".dropdown").find(".dropDownTitle").html(menu);
+	    		$li.closest(".dropdown").find(".dropDownTitle").html(menu+" Demo");
 	    	},
 	    	
         	"btap; .MainScreen-header .navbar-inner .nav > li.menu":function(event){
