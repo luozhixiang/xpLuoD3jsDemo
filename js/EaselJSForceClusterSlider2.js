@@ -27,7 +27,7 @@
 		},
 		
 		docEvents: {
-			"DO_SLIDE_LEVEL": function(event,extra){
+			"DO_SET_LEVEL": function(event,extra){
 				var view = this;
 				var stage = view.stage;
 				view.level = extra.level;
@@ -35,7 +35,7 @@
                 	view.showView(chartData);
 				});
 			},
-			"DO_SLIDE_ZOOM": function(event,extra){
+			"DO_SET_ZOOM": function(event,extra){
 				var view = this;
 				view.scaleVal = extra.scaleVal;
                 zoomChange.call(view, extra.scaleVal);

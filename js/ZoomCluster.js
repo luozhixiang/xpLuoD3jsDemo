@@ -21,8 +21,8 @@ var smr = smr || {};
 		var view = this;
 		var $e = view.$element;
         var $canvas = $e.find("canvas");
-        $canvas[0].width = $e.parent().width();
-        $canvas[0].height = $(window).height()-90;
+        $canvas[0].width  =  $e.parent().width();
+        $canvas[0].height =  $(window).height()-90;
         
 		app.ContactDao.get().done(function(chartData){
         	view.showView(chartData);
@@ -51,12 +51,12 @@ var smr = smr || {};
 	}
 	
 	ZoomCluster.prototype.docEvents = {
-		"DO_SLIDE_LEVEL": function(event,extra){
+		"DO_SET_LEVEL": function(event,extra){
 			var view = this;
 			view.level = extra.level;
 			levelSliderChange.call(view,extra.level);
 		},
-		"DO_SLIDE_ZOOM": function(event,extra){
+		"DO_SET_ZOOM": function(event,extra){
 			var view = this;
 			view.scale = extra.scale;
 			sliderZoomChange.call(view, extra.scale);

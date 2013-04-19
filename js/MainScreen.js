@@ -21,7 +21,7 @@
     			value: 1,  min: 1,  max: 4,  step: 1,
     			slide: function(event, ui) {
     			    app.level = ui.value;
-    				view.$el.trigger("DO_SLIDE_LEVEL",{level:ui.value});
+    				view.$el.trigger("DO_SET_LEVEL",{level:ui.value});
     				view.$el.find(".slider-level-value").text(ui.value);
     			}
     		});
@@ -29,7 +29,7 @@
     			value: 0.8, min: 0.1, max:1.5, step: 0.1,
     			slide: function(event, ui) {
     			 	app.scale = ui.value;
-    				view.$el.trigger("DO_SLIDE_ZOOM",{scale:ui.value});
+    				view.$el.trigger("DO_SET_ZOOM",{scale:ui.value});
     				view.$el.find(".slider-zoom-value").text((ui.value==1?"1.0":ui.value));
     			}
     		});
